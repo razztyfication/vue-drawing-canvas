@@ -1,13 +1,22 @@
-import { defineComponent, isVue2, h } from 'vue-demi';
-
 /* eslint-disable no-debugger, no-console */
-var VueDrawingCanvas = /*#__PURE__*/defineComponent({
+import { defineComponent, h, isVue2 } from 'vue-demi';
+
+interface DataInit {
+  drawing: boolean;
+  context: any;
+  images: any;
+  strokes: any;
+  guides: any;
+  trash: any;
+}
+
+export default /*#__PURE__*/defineComponent({
   name: 'VueDrawingCanvas',
   props: {
     strokeType: {
       type: String,
-      validator: value => {
-        return ['dash', 'square', 'circle', 'triangle', 'half_triangle'].indexOf(value) !== -1;
+      validator: (value: string) => {
+        return ['dash', 'square', 'circle', 'triangle', 'half_triangle'].indexOf(value) !== -1
       },
       default: () => 'dash'
     },
@@ -44,10 +53,10 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
       default: () => false
     },
     styles: {
-      type: [Array, String, Object]
+      type: [Array, String, Object],
     },
     classes: {
-      type: [Array, String, Object]
+      type: [Array, String, Object],
     },
     backgroundColor: {
       type: String,
@@ -62,24 +71,20 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
     },
     saveAs: {
       type: String,
-      validator: value => {
-        return ['jpeg', 'png'].indexOf(value) !== -1;
+      validator: (value: string) => {
+        return ['jpeg', 'png'].indexOf(value) !== -1
       },
       default: () => 'png'
     }
   },
-
-  data() {
+  data(): DataInit {
     return {
       drawing: false,
       context: null,
       images: [],
       strokes: {
         type: '',
-        from: {
-          x: 0,
-          y: 0
-        },
+        from: { x: 0, y: 0 },
         coordinates: [],
         color: '',
         width: '',
@@ -89,63 +94,55 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
       trash: []
     };
   },
-
   mounted() {
     this.setContext();
   },
-
   methods: {
     async setContext() {
-      let canvas = document.querySelector('#VueDrawingCanvas');
+      let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#VueDrawingCanvas');
       this.context = this.context ? this.context : canvas.getContext('2d');
+      
       await this.setBackground();
     },
-
     clear() {
       this.context.clearRect(0, 0, this.width, this.height);
     },
-
     async setBackground() {
       this.clear();
       this.context.fillStyle = this.backgroundColor;
       this.context.fillRect(0, 0, this.width, this.height);
-
+      
       if (this.backgroundImage) {
         const image = new Image();
         image.src = this.backgroundImage;
         image.onload = await this.drawBackgroundImage(image);
       }
-
       this.save();
-    },
-
+    },    
     async drawBackgroundImage(image) {
       this.context.drawImage(image, 0, 0, this.width, this.height);
       this.save();
-    },
-
+    },    
     getCoordinates(event) {
       let x, y;
-
       if (event.touches && event.touches.length > 0) {
-        let canvas = document.querySelector('#VueDrawingCanvas');
+        let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#VueDrawingCanvas');
         let rect = canvas.getBoundingClientRect();
-        x = event.touches[0].clientX - rect.left;
-        y = event.touches[0].clientY - rect.top;
+        x = (event.touches[0].clientX - rect.left);
+        y = (event.touches[0].clientY - rect.top);
       } else {
         x = event.offsetX;
         y = event.offsetY;
       }
-
       return {
         x: x,
         y: y
-      };
+      }
     },
-
     startDraw(event) {
       if (!this.lock) {
         this.drawing = true;
+
         let coordinate = this.getCoordinates(event);
         this.strokes = {
           type: this.eraser ? 'eraser' : this.strokeType,
@@ -158,109 +155,83 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
         this.guides = [];
       }
     },
-
     draw(event) {
       if (this.drawing) {
         if (!this.context) {
           this.setContext();
         }
-
         let coordinate = this.getCoordinates(event);
-
         if (this.eraser || this.strokeType === 'dash') {
           this.strokes.coordinates.push(coordinate);
           this.drawShape(this.strokes, false);
         } else {
           let coordinates;
-
           switch (this.strokeType) {
             case 'square':
-              coordinates = [{
-                x: coordinate.x,
-                y: this.strokes.from.y
-              }, {
-                x: coordinate.x,
-                y: coordinate.y
-              }, {
-                x: this.strokes.from.x,
-                y: coordinate.y
-              }];
+              coordinates = [
+                { x: coordinate.x, y: this.strokes.from.y },
+                { x: coordinate.x, y: coordinate.y },
+                { x: this.strokes.from.x, y: coordinate.y }
+              ];
               break;
-
             case 'triangle':
               let center = Math.floor((coordinate.x - this.strokes.from.x) / 2) < 0 ? Math.floor((coordinate.x - this.strokes.from.x) / 2) * -1 : Math.floor((coordinate.x - this.strokes.from.x) / 2);
               let width = this.strokes.from.x < coordinate.x ? this.strokes.from.x + center : this.strokes.from.x - center;
-              coordinates = [{
-                x: coordinate.x,
-                y: this.strokes.from.y
-              }, {
-                x: width,
-                y: coordinate.y
-              }];
+              coordinates = [
+                { x: coordinate.x, y: this.strokes.from.y },
+                { x: width, y: coordinate.y }
+              ];
               break;
-
             case 'half_triangle':
-              coordinates = [{
-                x: coordinate.x,
-                y: this.strokes.from.y
-              }, {
-                x: this.strokes.from.x,
-                y: coordinate.y
-              }];
+              coordinates = [
+                { x: coordinate.x, y: this.strokes.from.y },
+                { x: this.strokes.from.x, y: coordinate.y }
+              ];
               break;
-
             case 'circle':
               let radiusX = this.strokes.from.x - coordinate.x < 0 ? (this.strokes.from.x - coordinate.x) * -1 : this.strokes.from.x - coordinate.x;
-              coordinates = [{
-                x: this.strokes.from.x > coordinate.x ? this.strokes.from.x - radiusX : this.strokes.from.x + radiusX,
-                y: this.strokes.from.y
-              }, {
-                x: radiusX,
-                y: radiusX
-              }];
+              coordinates = [
+                { x: this.strokes.from.x > coordinate.x ? this.strokes.from.x - radiusX : this.strokes.from.x + radiusX, y: this.strokes.from.y },
+                { x: radiusX, y: radiusX }
+              ];
               break;
           }
-
           this.guides = coordinates;
           this.drawGuide(true);
         }
       }
     },
-
     drawGuide(closingPath) {
       this.redraw(false);
       this.context.strokeStyle = '#000000';
       this.context.lineWidth = 1;
       this.context.lineJoin = 'round';
       this.context.lineCap = 'round';
+
       this.context.beginPath();
       this.context.setLineDash([15, 15]);
-
       if (this.strokes.type === 'circle') {
         this.context.ellipse(this.guides[0].x, this.guides[0].y, this.guides[1].x, this.guides[1].y, 0, 0, Math.PI * 2);
       } else {
         this.context.moveTo(this.strokes.from.x, this.strokes.from.y);
-        this.guides.forEach(coordinate => {
+        this.guides.forEach((coordinate) => {
           this.context.lineTo(coordinate.x, coordinate.y);
         });
-
         if (closingPath) {
           this.context.closePath();
         }
       }
-
       this.context.stroke();
     },
-
     drawShape(strokes, closingPath) {
       this.context.strokeStyle = strokes.color;
       this.context.fillStyle = strokes.color;
       this.context.lineWidth = strokes.width;
       this.context.lineJoin = 'round';
       this.context.lineCap = 'round';
+      
       this.context.beginPath();
       this.context.setLineDash([]);
-
       if (strokes.type === 'circle') {
         this.context.ellipse(strokes.coordinates[0].x, strokes.coordinates[0].y, strokes.coordinates[1].x, strokes.coordinates[1].y, 0, 0, Math.PI * 2);
       } else {
@@ -268,19 +239,16 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
         strokes.coordinates.forEach(stroke => {
           this.context.lineTo(stroke.x, stroke.y);
         });
-
         if (closingPath) {
           this.context.closePath();
         }
       }
-
       if (strokes.fill) {
         this.context.fill();
       } else {
         this.context.stroke();
       }
     },
-
     stopDraw() {
       if (this.drawing) {
         this.strokes.coordinates = this.guides.length > 0 ? this.guides : this.strokes.coordinates;
@@ -290,7 +258,6 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
         this.trash = [];
       }
     },
-
     reset() {
       if (!this.lock) {
         this.images = [];
@@ -306,86 +273,81 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
         this.redraw();
       }
     },
-
     undo() {
       if (!this.lock) {
         let strokes = this.images.pop();
-
         if (strokes) {
           this.trash.push(strokes);
           this.redraw();
         }
       }
     },
-
     redo() {
       if (!this.lock) {
         let strokes = this.trash.pop();
-
         if (strokes) {
           this.images.push(strokes);
           this.redraw();
         }
       }
     },
-
-    async redraw(output) {
+    async redraw(output: boolean) {
       output = typeof output !== 'undefined' ? output : true;
-      await this.setBackground().then(() => {
+      await this.setBackground()
+      .then(() => {
         this.images.forEach(strokes => {
-          this.drawShape(strokes, this.type = false );
+          this.drawShape(strokes, this.type = 'eraser' || this.type === 'dash' ? false : true);
         });
-      }).then(() => {
+      })
+      .then(() => {
         if (output) {
           this.save();
         }
       });
     },
-
     save() {
       if (this.watermark) {
-        let canvas = document.querySelector('#VueDrawingCanvas');
-        let temp = document.createElement('canvas');
+        let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#VueDrawingCanvas');
+        let temp: HTMLCanvasElement = <HTMLCanvasElement>document.createElement('canvas');
         let ctx = temp.getContext('2d');
         temp.width = this.width;
         temp.height = this.height;
         ctx.drawImage(canvas, 0, 0, this.width, this.height);
 
         if (this.watermark.type === 'Image') {
-          let imageWidth = this.watermark.imageStyle ? this.watermark.imageStyle.width ? this.watermark.imageStyle.width : this.width : this.width;
-          let imageHeight = this.watermark.imageStyle ? this.watermark.imageStyle.height ? this.watermark.imageStyle.height : this.height : this.height;
+          let imageWidth = this.watermark.imageStyle ? (this.watermark.imageStyle.width ? this.watermark.imageStyle.width : this.width) : this.width;
+          let imageHeight = this.watermark.imageStyle ? (this.watermark.imageStyle.height ? this.watermark.imageStyle.height : this.height) : this.height;
+
           const image = new Image();
           image.src = this.watermark.source;
-
           image.onload = () => {
             ctx.drawImage(image, this.watermark.x, this.watermark.y, imageWidth, imageHeight);
             this.$emit('update:image', temp.toDataURL('image/' + this.saveAs, 1));
-            return temp.toDataURL('image/' + this.saveAs, 1);
-          };
+            return(temp.toDataURL('image/' + this.saveAs, 1));
+          }
         } else if (this.watermark.type === 'Text') {
-          let font = this.watermark.fontStyle ? this.watermark.fontStyle.font ? this.watermark.fontStyle.font : '20px serif' : '20px serif';
-          let align = this.watermark.fontStyle ? this.watermark.fontStyle.textAlign ? this.watermark.fontStyle.textAlign : 'start' : 'start';
-          let baseline = this.watermark.fontStyle ? this.watermark.fontStyle.textBaseline ? this.watermark.fontStyle.textBaseline : 'alphabetic' : 'alphabetic';
-          let color = this.watermark.fontStyle ? this.watermark.fontStyle.color ? this.watermark.fontStyle.color : '#000000' : '#000000';
+          let font = this.watermark.fontStyle ? (this.watermark.fontStyle.font ? this.watermark.fontStyle.font : '20px serif') : '20px serif';
+          let align = this.watermark.fontStyle ? (this.watermark.fontStyle.textAlign ? this.watermark.fontStyle.textAlign : 'start') : 'start';
+          let baseline = this.watermark.fontStyle ? (this.watermark.fontStyle.textBaseline ? this.watermark.fontStyle.textBaseline : 'alphabetic') : 'alphabetic';
+          let color = this.watermark.fontStyle ? (this.watermark.fontStyle.color ? this.watermark.fontStyle.color : '#000000') : '#000000';
+          
           ctx.font = font;
           ctx.textAlign = align;
           ctx.textBaseline = baseline;
 
           if (this.watermark.fontStyle && this.watermark.fontStyle.rotate) {
             let centerX, centerY;
-
             if (this.watermark.fontStyle && this.watermark.fontStyle.width) {
               centerX = this.watermark.x + Math.floor(this.watermark.fontStyle.width / 2);
             } else {
               centerX = this.watermark.x;
             }
-
             if (this.watermark.fontStyle && this.watermark.fontStyle.lineHeight) {
               centerY = this.watermark.y + Math.floor(this.watermark.fontStyle.lineHeight / 2);
             } else {
               centerY = this.watermark.y;
             }
-
+            
             ctx.translate(centerX, centerY);
             ctx.rotate(this.watermark.fontStyle.rotate * Math.PI / 180);
             ctx.translate(centerX * -1, centerY * -1);
@@ -393,7 +355,6 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
 
           if (this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') {
             ctx.strokeStyle = this.watermark.fontStyle.color;
-
             if (this.watermark.fontStyle && this.watermark.fontStyle.width) {
               ctx.strokeText(this.watermark.source, this.watermark.x, this.watermark.y, this.watermark.fontStyle.width);
             } else {
@@ -401,30 +362,25 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
             }
           } else {
             ctx.fillStyle = color;
-
             if (this.watermark.fontStyle && this.watermark.fontStyle.width) {
               ctx.fillText(this.watermark.source, this.watermark.x, this.watermark.y, this.watermark.fontStyle.width);
             } else {
               ctx.fillText(this.watermark.source, this.watermark.x, this.watermark.y);
             }
           }
-
           this.$emit('update:image', temp.toDataURL('image/' + this.saveAs, 1));
-          return temp.toDataURL('image/' + this.saveAs, 1);
+          return(temp.toDataURL('image/' + this.saveAs, 1));
         }
       } else {
-        let canvas = document.querySelector('#VueDrawingCanvas');
+        let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#VueDrawingCanvas');
         this.$emit('update:image', canvas.toDataURL('image/' + this.saveAs, 1));
         return canvas.toDataURL('image/' + this.saveAs, 1);
       }
     },
-
     isEmpty() {
       return this.images.length > 0 ? false : true;
     }
-
   },
-
   render() {
     if (isVue2) {
       return h('canvas', {
@@ -452,7 +408,6 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
         ...this.$props
       });
     }
-
     return h('canvas', {
       id: 'VueDrawingCanvas',
       height: this.height,
@@ -473,7 +428,4 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
       onTouchcancel: $event => this.stopDraw($event)
     });
   }
-
 });
-
-export { VueDrawingCanvas as default };

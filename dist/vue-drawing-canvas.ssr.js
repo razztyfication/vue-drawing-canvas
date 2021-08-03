@@ -85,9 +85,24 @@ function _defineProperty(obj, key, value) {
   }
 
   return obj;
-}var script = /*#__PURE__*/vueDemi.defineComponent({
+}var VueDrawingCanvas = /*#__PURE__*/vueDemi.defineComponent({
   name: 'VueDrawingCanvas',
   props: {
+    strokeType: {
+      type: String,
+      validator: function validator(value) {
+        return ['dash', 'square', 'circle', 'triangle', 'half_triangle'].indexOf(value) !== -1;
+      },
+      default: function _default() {
+        return 'dash';
+      }
+    },
+    fillShape: {
+      type: Boolean,
+      default: function _default() {
+        return false;
+      }
+    },
     width: {
       type: [String, Number],
       default: function _default() {
@@ -150,16 +165,34 @@ function _defineProperty(obj, key, value) {
     },
     watermark: {
       type: Object
+    },
+    saveAs: {
+      type: String,
+      validator: function validator(value) {
+        return ['jpeg', 'png'].indexOf(value) !== -1;
+      },
+      default: function _default() {
+        return 'png';
+      }
     }
   },
   data: function data() {
     return {
       drawing: false,
-      offsetX: 0,
-      offsetY: 0,
       context: null,
       images: [],
-      strokes: [],
+      strokes: {
+        type: '',
+        from: {
+          x: 0,
+          y: 0
+        },
+        coordinates: [],
+        color: '',
+        width: '',
+        fill: false
+      },
+      guides: [],
       trash: []
     };
   },
@@ -168,43 +201,20 @@ function _defineProperty(obj, key, value) {
   },
   methods: {
     setContext: function setContext() {
-      var canvas = document.querySelector('#VueDrawingCanvas');
-      this.context = this.context ? this.context : canvas.getContext('2d');
-      this.setBackground();
-      this.save();
-    },
-    clear: function clear() {
-      this.context.clearRect(0, 0, this.width, this.height);
-    },
-    setBackground: function setBackground() {
       var _this = this;
 
       return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
-        var image;
+        var canvas;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                _this.clear();
+                canvas = document.querySelector('#VueDrawingCanvas');
+                _this.context = _this.context ? _this.context : canvas.getContext('2d');
+                _context.next = 4;
+                return _this.setBackground();
 
-                _this.context.fillStyle = _this.backgroundColor;
-
-                _this.context.fillRect(0, 0, _this.width, _this.height);
-
-                if (!_this.backgroundImage) {
-                  _context.next = 9;
-                  break;
-                }
-
-                image = new Image();
-                image.src = _this.backgroundImage;
-                _context.next = 8;
-                return _this.drawBackgroundImage(image);
-
-              case 8:
-                image.onload = _context.sent;
-
-              case 9:
+              case 4:
               case "end":
                 return _context.stop();
             }
@@ -212,24 +222,66 @@ function _defineProperty(obj, key, value) {
         }, _callee);
       }))();
     },
-    drawBackgroundImage: function drawBackgroundImage(image) {
+    clear: function clear() {
+      this.context.clearRect(0, 0, this.width, this.height);
+    },
+    setBackground: function setBackground() {
       var _this2 = this;
 
       return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+        var image;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                _this2.context.drawImage(image, 0, 0, _this2.width, _this2.height);
+                _this2.clear();
 
+                _this2.context.fillStyle = _this2.backgroundColor;
+
+                _this2.context.fillRect(0, 0, _this2.width, _this2.height);
+
+                if (!_this2.backgroundImage) {
+                  _context2.next = 9;
+                  break;
+                }
+
+                image = new Image();
+                image.src = _this2.backgroundImage;
+                _context2.next = 8;
+                return _this2.drawBackgroundImage(image);
+
+              case 8:
+                image.onload = _context2.sent;
+
+              case 9:
                 _this2.save();
 
-              case 2:
+              case 10:
               case "end":
                 return _context2.stop();
             }
           }
         }, _callee2);
+      }))();
+    },
+    drawBackgroundImage: function drawBackgroundImage(image) {
+      var _this3 = this;
+
+      return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                _this3.context.drawImage(image, 0, 0, _this3.width, _this3.height);
+
+                _this3.save();
+
+              case 2:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3);
       }))();
     },
     getCoordinates: function getCoordinates(event) {
@@ -253,28 +305,17 @@ function _defineProperty(obj, key, value) {
     startDraw: function startDraw(event) {
       if (!this.lock) {
         this.drawing = true;
-        this.strokes = [];
         var coordinate = this.getCoordinates(event);
-        this.strokes.push({
-          color: this.eraser ? 'white' : this.color,
+        this.strokes = {
+          type: this.eraser ? 'eraser' : this.strokeType,
+          from: coordinate,
+          coordinates: [],
+          color: this.eraser ? this.backgroundColor : this.color,
           width: this.lineWidth,
-          x: coordinate.x,
-          y: coordinate.y
-        });
-        this.offsetX = coordinate.x;
-        this.offsetY = coordinate.y;
+          fill: this.eraser || this.strokeType === 'dash' ? false : this.fillShape
+        };
+        this.guides = [];
       }
-    },
-    drawLine: function drawLine(color, width, from, to) {
-      this.context.strokeStyle = color;
-      this.context.lineWidth = width;
-      this.context.lineJoin = 'round';
-      this.context.beginPath();
-      this.context.moveTo(from.x, from.y);
-      this.context.lineTo(to.x, to.y);
-      this.context.closePath();
-      this.context.stroke();
-      this.save();
     },
     draw: function draw(event) {
       if (this.drawing) {
@@ -283,40 +324,144 @@ function _defineProperty(obj, key, value) {
         }
 
         var coordinate = this.getCoordinates(event);
-        this.drawLine(this.eraser ? this.backgroundColor : this.color, this.lineWidth, {
-          x: this.offsetX,
-          y: this.offsetY
-        }, {
-          x: coordinate.x,
-          y: coordinate.y
+
+        if (this.eraser || this.strokeType === 'dash') {
+          this.strokes.coordinates.push(coordinate);
+          this.drawShape(this.strokes, false);
+        } else {
+          var coordinates;
+
+          switch (this.strokeType) {
+            case 'square':
+              coordinates = [{
+                x: coordinate.x,
+                y: this.strokes.from.y
+              }, {
+                x: coordinate.x,
+                y: coordinate.y
+              }, {
+                x: this.strokes.from.x,
+                y: coordinate.y
+              }];
+              break;
+
+            case 'triangle':
+              var center = Math.floor((coordinate.x - this.strokes.from.x) / 2) < 0 ? Math.floor((coordinate.x - this.strokes.from.x) / 2) * -1 : Math.floor((coordinate.x - this.strokes.from.x) / 2);
+              var width = this.strokes.from.x < coordinate.x ? this.strokes.from.x + center : this.strokes.from.x - center;
+              coordinates = [{
+                x: coordinate.x,
+                y: this.strokes.from.y
+              }, {
+                x: width,
+                y: coordinate.y
+              }];
+              break;
+
+            case 'half_triangle':
+              coordinates = [{
+                x: coordinate.x,
+                y: this.strokes.from.y
+              }, {
+                x: this.strokes.from.x,
+                y: coordinate.y
+              }];
+              break;
+
+            case 'circle':
+              var radiusX = this.strokes.from.x - coordinate.x < 0 ? (this.strokes.from.x - coordinate.x) * -1 : this.strokes.from.x - coordinate.x;
+              coordinates = [{
+                x: this.strokes.from.x > coordinate.x ? this.strokes.from.x - radiusX : this.strokes.from.x + radiusX,
+                y: this.strokes.from.y
+              }, {
+                x: radiusX,
+                y: radiusX
+              }];
+              break;
+          }
+
+          this.guides = coordinates;
+          this.drawGuide(true);
+        }
+      }
+    },
+    drawGuide: function drawGuide(closingPath) {
+      var _this4 = this;
+
+      this.redraw(false);
+      this.context.strokeStyle = '#000000';
+      this.context.lineWidth = 1;
+      this.context.lineJoin = 'round';
+      this.context.lineCap = 'round';
+      this.context.beginPath();
+      this.context.setLineDash([15, 15]);
+
+      if (this.strokes.type === 'circle') {
+        this.context.ellipse(this.guides[0].x, this.guides[0].y, this.guides[1].x, this.guides[1].y, 0, 0, Math.PI * 2);
+      } else {
+        this.context.moveTo(this.strokes.from.x, this.strokes.from.y);
+        this.guides.forEach(function (coordinate) {
+          _this4.context.lineTo(coordinate.x, coordinate.y);
         });
-        this.strokes.push({
-          color: this.eraser ? 'white' : this.color,
-          width: this.lineWidth,
-          x: coordinate.x,
-          y: coordinate.y
+
+        if (closingPath) {
+          this.context.closePath();
+        }
+      }
+
+      this.context.stroke();
+    },
+    drawShape: function drawShape(strokes, closingPath) {
+      var _this5 = this;
+
+      this.context.strokeStyle = strokes.color;
+      this.context.fillStyle = strokes.color;
+      this.context.lineWidth = strokes.width;
+      this.context.lineJoin = 'round';
+      this.context.lineCap = 'round';
+      this.context.beginPath();
+      this.context.setLineDash([]);
+
+      if (strokes.type === 'circle') {
+        this.context.ellipse(strokes.coordinates[0].x, strokes.coordinates[0].y, strokes.coordinates[1].x, strokes.coordinates[1].y, 0, 0, Math.PI * 2);
+      } else {
+        this.context.moveTo(strokes.from.x, strokes.from.y);
+        strokes.coordinates.forEach(function (stroke) {
+          _this5.context.lineTo(stroke.x, stroke.y);
         });
-        this.offsetX = coordinate.x;
-        this.offsetY = coordinate.y;
+
+        if (closingPath) {
+          this.context.closePath();
+        }
+      }
+
+      if (strokes.fill) {
+        this.context.fill();
+      } else {
+        this.context.stroke();
       }
     },
     stopDraw: function stopDraw() {
       if (this.drawing) {
-        if (this.strokes.length > 1) {
-          this.images.push(this.strokes);
-        }
-
+        this.strokes.coordinates = this.guides.length > 0 ? this.guides : this.strokes.coordinates;
+        this.images.push(this.strokes);
+        this.redraw();
         this.drawing = false;
         this.trash = [];
       }
     },
     reset: function reset() {
       if (!this.lock) {
-        this.setBackground();
         this.images = [];
-        this.strokes = [];
+        this.strokes = {
+          type: '',
+          coordinates: [],
+          color: '',
+          width: '',
+          fill: false
+        };
+        this.guides = [];
         this.trash = [];
-        this.save();
+        this.redraw();
       }
     },
     undo: function undo() {
@@ -339,54 +484,36 @@ function _defineProperty(obj, key, value) {
         }
       }
     },
-    redraw: function redraw() {
-      var _this3 = this;
+    redraw: function redraw(output) {
+      var _this6 = this;
 
-      return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
-        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+      return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
+        return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
-            switch (_context3.prev = _context3.next) {
+            switch (_context4.prev = _context4.next) {
               case 0:
-                _context3.next = 2;
-                return _this3.setBackground().then(function () {
-                  var start;
-
-                  _this3.images.forEach(function (strokes) {
-                    start = null;
-                    var color = strokes[0].color;
-                    var width = strokes[0].width;
-                    _this3.context.strokeStyle = color;
-                    _this3.context.lineWidth = width;
-                    _this3.context.lineJoin = 'round';
-
-                    _this3.context.beginPath();
-
-                    strokes.forEach(function (path) {
-                      if (start) {
-                        _this3.context.lineTo(path.x, path.y);
-
-                        _this3.context.stroke();
-                      } else {
-                        _this3.context.moveTo(path.x, path.y);
-
-                        start = path;
-                      }
-                    });
+                output = typeof output !== 'undefined' ? output : true;
+                _context4.next = 3;
+                return _this6.setBackground().then(function () {
+                  _this6.images.forEach(function (strokes) {
+                    _this6.drawShape(strokes, _this6.type = false );
                   });
-
-                  _this3.save();
+                }).then(function () {
+                  if (output) {
+                    _this6.save();
+                  }
                 });
 
-              case 2:
+              case 3:
               case "end":
-                return _context3.stop();
+                return _context4.stop();
             }
           }
-        }, _callee3);
+        }, _callee4);
       }))();
     },
     save: function save() {
-      var _this4 = this;
+      var _this7 = this;
 
       if (this.watermark) {
         var canvas = document.querySelector('#VueDrawingCanvas');
@@ -397,44 +524,73 @@ function _defineProperty(obj, key, value) {
         ctx.drawImage(canvas, 0, 0, this.width, this.height);
 
         if (this.watermark.type === 'Image') {
+          var imageWidth = this.watermark.imageStyle ? this.watermark.imageStyle.width ? this.watermark.imageStyle.width : this.width : this.width;
+          var imageHeight = this.watermark.imageStyle ? this.watermark.imageStyle.height ? this.watermark.imageStyle.height : this.height : this.height;
           var image = new Image();
           image.src = this.watermark.source;
 
           image.onload = function () {
-            ctx.drawImage(image, _this4.watermark.x, _this4.watermark.y, _this4.watermark.imageStyle.width, _this4.watermark.imageStyle.height);
+            ctx.drawImage(image, _this7.watermark.x, _this7.watermark.y, imageWidth, imageHeight);
 
-            _this4.$emit('update:image', temp.toDataURL());
+            _this7.$emit('update:image', temp.toDataURL('image/' + _this7.saveAs, 1));
 
-            return temp.toDataURL();
+            return temp.toDataURL('image/' + _this7.saveAs, 1);
           };
         } else if (this.watermark.type === 'Text') {
-          ctx.font = this.watermark.fontStyle.font;
-          ctx.textAlign = this.watermark.fontStyle.textAlign;
-          ctx.textBaseline = this.watermark.fontStyle.textBaseline;
-          var centerX = this.watermark.x + Math.floor(this.watermark.fontStyle.width / 2); // kalo ga ada width nya ga usah di translate
+          var font = this.watermark.fontStyle ? this.watermark.fontStyle.font ? this.watermark.fontStyle.font : '20px serif' : '20px serif';
+          var align = this.watermark.fontStyle ? this.watermark.fontStyle.textAlign ? this.watermark.fontStyle.textAlign : 'start' : 'start';
+          var baseline = this.watermark.fontStyle ? this.watermark.fontStyle.textBaseline ? this.watermark.fontStyle.textBaseline : 'alphabetic' : 'alphabetic';
+          var color = this.watermark.fontStyle ? this.watermark.fontStyle.color ? this.watermark.fontStyle.color : '#000000' : '#000000';
+          ctx.font = font;
+          ctx.textAlign = align;
+          ctx.textBaseline = baseline;
 
-          var centerY = this.watermark.y + Math.floor(this.watermark.fontStyle.lineHeight / 2); // kalo ga ada width nya ga usah di translate
+          if (this.watermark.fontStyle && this.watermark.fontStyle.rotate) {
+            var centerX, centerY;
 
-          ctx.translate(centerX, centerY);
-          ctx.rotate(this.watermark.fontStyle.rotate * Math.PI / 180);
-          ctx.translate(centerX * -1, centerY * -1);
+            if (this.watermark.fontStyle && this.watermark.fontStyle.width) {
+              centerX = this.watermark.x + Math.floor(this.watermark.fontStyle.width / 2);
+            } else {
+              centerX = this.watermark.x;
+            }
 
-          if (this.watermark.fontStyle.drawType === 'stroke') {
-            ctx.strokeStyle = this.watermark.fontStyle.color;
-            ctx.strokeText(this.watermark.source, this.watermark.x, this.watermark.y, this.watermark.fontStyle.width);
-          } else {
-            ctx.fillStyle = this.watermark.fontStyle.color;
-            ctx.fillText(this.watermark.source, this.watermark.x, this.watermark.y, this.watermark.fontStyle.width);
+            if (this.watermark.fontStyle && this.watermark.fontStyle.lineHeight) {
+              centerY = this.watermark.y + Math.floor(this.watermark.fontStyle.lineHeight / 2);
+            } else {
+              centerY = this.watermark.y;
+            }
+
+            ctx.translate(centerX, centerY);
+            ctx.rotate(this.watermark.fontStyle.rotate * Math.PI / 180);
+            ctx.translate(centerX * -1, centerY * -1);
           }
 
-          this.$emit('update:image', temp.toDataURL());
-          return temp.toDataURL();
+          if (this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') {
+            ctx.strokeStyle = this.watermark.fontStyle.color;
+
+            if (this.watermark.fontStyle && this.watermark.fontStyle.width) {
+              ctx.strokeText(this.watermark.source, this.watermark.x, this.watermark.y, this.watermark.fontStyle.width);
+            } else {
+              ctx.strokeText(this.watermark.source, this.watermark.x, this.watermark.y);
+            }
+          } else {
+            ctx.fillStyle = color;
+
+            if (this.watermark.fontStyle && this.watermark.fontStyle.width) {
+              ctx.fillText(this.watermark.source, this.watermark.x, this.watermark.y, this.watermark.fontStyle.width);
+            } else {
+              ctx.fillText(this.watermark.source, this.watermark.x, this.watermark.y);
+            }
+          }
+
+          this.$emit('update:image', temp.toDataURL('image/' + this.saveAs, 1));
+          return temp.toDataURL('image/' + this.saveAs, 1);
         }
       } else {
         var _canvas = document.querySelector('#VueDrawingCanvas');
 
-        this.$emit('update:image', _canvas.toDataURL());
-        return _canvas.toDataURL();
+        this.$emit('update:image', _canvas.toDataURL('image/' + this.saveAs, 1));
+        return _canvas.toDataURL('image/' + this.saveAs, 1);
       }
     },
     isEmpty: function isEmpty() {
@@ -442,7 +598,7 @@ function _defineProperty(obj, key, value) {
     }
   },
   render: function render() {
-    var _this5 = this;
+    var _this8 = this;
 
     if (vueDemi.isVue2) {
       return vueDemi.h('canvas', _objectSpread2({
@@ -457,31 +613,31 @@ function _defineProperty(obj, key, value) {
         class: this.classes,
         on: {
           mousedown: function mousedown(event) {
-            return _this5.startDraw(event);
+            return _this8.startDraw(event);
           },
           mousemove: function mousemove(event) {
-            return _this5.draw(event);
+            return _this8.draw(event);
           },
           mouseup: function mouseup(event) {
-            return _this5.stopDraw(event);
+            return _this8.stopDraw(event);
           },
           mouseleave: function mouseleave(event) {
-            return _this5.stopDraw(event);
+            return _this8.stopDraw(event);
           },
           touchstart: function touchstart(event) {
-            return _this5.startDraw(event);
+            return _this8.startDraw(event);
           },
           touchmove: function touchmove(event) {
-            return _this5.draw(event);
+            return _this8.draw(event);
           },
           touchend: function touchend(event) {
-            return _this5.stopDraw(event);
+            return _this8.stopDraw(event);
           },
           touchleave: function touchleave(event) {
-            return _this5.stopDraw(event);
+            return _this8.stopDraw(event);
           },
           touchcancel: function touchcancel(event) {
-            return _this5.stopDraw(event);
+            return _this8.stopDraw(event);
           }
         }
       }, this.$props));
@@ -491,61 +647,37 @@ function _defineProperty(obj, key, value) {
       id: 'VueDrawingCanvas',
       height: this.height,
       width: this.width,
-      style: this.styles,
+      style: _objectSpread2({
+        'touchAction': 'none'
+      }, this.styles),
       class: this.classes,
       onMousedown: function onMousedown($event) {
-        return _this5.startDraw($event);
+        return _this8.startDraw($event);
       },
       onMousemove: function onMousemove($event) {
-        return _this5.draw($event);
+        return _this8.draw($event);
       },
       onMouseup: function onMouseup($event) {
-        return _this5.stopDraw($event);
+        return _this8.stopDraw($event);
       },
       onMouseleave: function onMouseleave($event) {
-        return _this5.stopDraw($event);
+        return _this8.stopDraw($event);
       },
       onTouchstart: function onTouchstart($event) {
-        return _this5.startDraw($event);
+        return _this8.startDraw($event);
       },
       onTouchmove: function onTouchmove($event) {
-        return _this5.draw($event);
+        return _this8.draw($event);
       },
       onTouchend: function onTouchend($event) {
-        return _this5.stopDraw($event);
+        return _this8.stopDraw($event);
       },
       onTouchleave: function onTouchleave($event) {
-        return _this5.stopDraw($event);
+        return _this8.stopDraw($event);
       },
       onTouchcancel: function onTouchcancel($event) {
-        return _this5.stopDraw($event);
+        return _this8.stopDraw($event);
       }
     });
   }
-});function styleInject(css, ref) {
-  if ( ref === void 0 ) ref = {};
-  var insertAt = ref.insertAt;
-
-  if (!css || typeof document === 'undefined') { return; }
-
-  var head = document.head || document.getElementsByTagName('head')[0];
-  var style = document.createElement('style');
-  style.type = 'text/css';
-
-  if (insertAt === 'top') {
-    if (head.firstChild) {
-      head.insertBefore(style, head.firstChild);
-    } else {
-      head.appendChild(style);
-    }
-  } else {
-    head.appendChild(style);
-  }
-
-  if (style.styleSheet) {
-    style.styleSheet.cssText = css;
-  } else {
-    style.appendChild(document.createTextNode(css));
-  }
-}var css_248z = "\n#VueDrawingCanvas[data-v-73e835f2] {\r\n    touch-action: none;\n}\r\n";
-styleInject(css_248z);script.__scopeId = "data-v-73e835f2";module.exports=script;
+});module.exports=VueDrawingCanvas;

@@ -1,2 +1,2 @@
-import VueDrawingCanvas from "./VueDrawingCanvas.vue"
+import VueDrawingCanvas from "./VueDrawingCanvas"
 export default VueDrawingCanvas

@@ -1,4 +1,21 @@
+interface DataInit {
+    drawing: boolean;
+    context: any;
+    images: any;
+    strokes: any;
+    guides: any;
+    trash: any;
+}
 declare const _default: import("vue-demi").DefineComponent<{
+    strokeType: {
+        type: StringConstructor;
+        validator: (value: string) => boolean;
+        default: () => string;
+    };
+    fillShape: {
+        type: BooleanConstructor;
+        default: () => boolean;
+    };
     width: {
         type: (StringConstructor | NumberConstructor)[];
         default: () => number;
@@ -44,16 +61,13 @@ declare const _default: import("vue-demi").DefineComponent<{
     watermark: {
         type: ObjectConstructor;
     };
-}, unknown, {
-    drawing: boolean;
-    offsetX: number;
-    offsetY: number;
-    context: any;
-    images: any[];
-    strokes: any[];
-    trash: any[];
-}, {}, {
-    setContext(): void;
+    saveAs: {
+        type: StringConstructor;
+        validator: (value: string) => boolean;
+        default: () => string;
+    };
+}, unknown, DataInit, {}, {
+    setContext(): Promise<void>;
     clear(): void;
     setBackground(): Promise<void>;
     drawBackgroundImage(image: any): Promise<void>;
@@ -62,16 +76,19 @@ declare const _default: import("vue-demi").DefineComponent<{
         y: any;
     };
     startDraw(event: any): void;
-    drawLine(color: any, width: any, from: any, to: any): void;
     draw(event: any): void;
+    drawGuide(closingPath: any): void;
+    drawShape(strokes: any, closingPath: any): void;
     stopDraw(): void;
     reset(): void;
     undo(): void;
     redo(): void;
-    redraw(): Promise<void>;
+    redraw(output: boolean): Promise<void>;
     save(): string;
     isEmpty(): boolean;
 }, import("vue-demi").ComponentOptionsMixin, import("vue-demi").ComponentOptionsMixin, Record<string, any>, string, import("vue-demi").VNodeProps & import("vue-demi").AllowedComponentProps & import("vue-demi").ComponentCustomProps, Readonly<{
+    strokeType?: unknown;
+    fillShape?: unknown;
     width?: unknown;
     height?: unknown;
     image?: unknown;
@@ -84,7 +101,10 @@ declare const _default: import("vue-demi").DefineComponent<{
     backgroundColor?: unknown;
     backgroundImage?: unknown;
     watermark?: unknown;
+    saveAs?: unknown;
 } & {
+    strokeType: string;
+    fillShape: boolean;
     width: string | number;
     height: string | number;
     image: string;
@@ -93,12 +113,15 @@ declare const _default: import("vue-demi").DefineComponent<{
     lineWidth: number;
     lock: boolean;
     backgroundColor: string;
+    saveAs: string;
 } & {
     styles?: unknown;
     classes?: unknown;
     backgroundImage?: string;
     watermark?: Record<string, any>;
 }>, {
+    strokeType: string;
+    fillShape: boolean;
     width: string | number;
     height: string | number;
     image: string;
@@ -108,5 +131,6 @@ declare const _default: import("vue-demi").DefineComponent<{
     lock: boolean;
     backgroundColor: string;
     backgroundImage: string;
+    saveAs: string;
 }>;
 export default _default;
