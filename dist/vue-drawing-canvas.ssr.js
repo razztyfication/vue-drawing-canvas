@@ -178,6 +178,7 @@ function _defineProperty(obj, key, value) {
   },
   data: function data() {
     return {
+      loadedImage: null,
       drawing: false,
       context: null,
       images: [],
@@ -198,6 +199,11 @@ function _defineProperty(obj, key, value) {
   },
   mounted: function mounted() {
     this.setContext();
+  },
+  watch: {
+    backgroundImage: function backgroundImage() {
+      this.loadedImage = null;
+    }
   },
   methods: {
     setContext: function setContext() {
@@ -228,11 +234,10 @@ function _defineProperty(obj, key, value) {
     setBackground: function setBackground() {
       var _this2 = this;
 
-      return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
-        var image;
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+      return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
-            switch (_context2.prev = _context2.next) {
+            switch (_context3.prev = _context3.next) {
               case 0:
                 _this2.clear();
 
@@ -240,48 +245,70 @@ function _defineProperty(obj, key, value) {
 
                 _this2.context.fillRect(0, 0, _this2.width, _this2.height);
 
-                if (!_this2.backgroundImage) {
-                  _context2.next = 9;
-                  break;
-                }
+                _context3.next = 5;
+                return _this2.$nextTick( /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
+                  return regeneratorRuntime.wrap(function _callee2$(_context2) {
+                    while (1) {
+                      switch (_context2.prev = _context2.next) {
+                        case 0:
+                          _context2.next = 2;
+                          return _this2.drawBackgroundImage();
 
-                image = new Image();
-                image.src = _this2.backgroundImage;
-                _context2.next = 8;
-                return _this2.drawBackgroundImage(image);
+                        case 2:
+                        case "end":
+                          return _context2.stop();
+                      }
+                    }
+                  }, _callee2);
+                })));
 
-              case 8:
-                image.onload = _context2.sent;
-
-              case 9:
+              case 5:
                 _this2.save();
 
-              case 10:
-              case "end":
-                return _context2.stop();
-            }
-          }
-        }, _callee2);
-      }))();
-    },
-    drawBackgroundImage: function drawBackgroundImage(image) {
-      var _this3 = this;
-
-      return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3() {
-        return regeneratorRuntime.wrap(function _callee3$(_context3) {
-          while (1) {
-            switch (_context3.prev = _context3.next) {
-              case 0:
-                _this3.context.drawImage(image, 0, 0, _this3.width, _this3.height);
-
-                _this3.save();
-
-              case 2:
+              case 6:
               case "end":
                 return _context3.stop();
             }
           }
         }, _callee3);
+      }))();
+    },
+    drawBackgroundImage: function drawBackgroundImage() {
+      var _this3 = this;
+
+      return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
+        return regeneratorRuntime.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                if (_this3.loadedImage) {
+                  _context4.next = 4;
+                  break;
+                }
+
+                return _context4.abrupt("return", new Promise(function (resolve, reject) {
+                  var image = new Image();
+                  image.src = _this3.backgroundImage;
+
+                  image.onload = function () {
+                    _this3.context.drawImage(image, 0, 0, _this3.width, _this3.height);
+
+                    _this3.loadedImage = image;
+                    resolve();
+                  };
+
+                  image.onerror = reject;
+                }));
+
+              case 4:
+                _this3.context.drawImage(_this3.loadedImage, 0, 0, _this3.width, _this3.height);
+
+              case 5:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        }, _callee4);
       }))();
     },
     getCoordinates: function getCoordinates(event) {
@@ -487,13 +514,13 @@ function _defineProperty(obj, key, value) {
     redraw: function redraw(output) {
       var _this6 = this;
 
-      return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
-        return regeneratorRuntime.wrap(function _callee4$(_context4) {
+      return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee5() {
+        return regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
-            switch (_context4.prev = _context4.next) {
+            switch (_context5.prev = _context5.next) {
               case 0:
                 output = typeof output !== 'undefined' ? output : true;
-                _context4.next = 3;
+                _context5.next = 3;
                 return _this6.setBackground().then(function () {
                   _this6.images.forEach(function (strokes) {
                     _this6.drawShape(strokes, _this6.type = false );
@@ -506,10 +533,10 @@ function _defineProperty(obj, key, value) {
 
               case 3:
               case "end":
-                return _context4.stop();
+                return _context5.stop();
             }
           }
-        }, _callee4);
+        }, _callee5);
       }))();
     },
     save: function save() {

@@ -8,13 +8,11 @@ Support for both Vue 3 and Vue 2 + [Composition API](https://github.com/vuejs/co
 
 <h2>Demo</h2>
 
-<br>
-
-## Vue 3
+### Vue 3
 
 [![Vue 3 Drawing Canvas Demo](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/vue-3-drawing-canvas-demo-ihmmz)
 
-## Vue 2
+### Vue 2
 
 > Deployed on a nuxt container which have access to terminal
 

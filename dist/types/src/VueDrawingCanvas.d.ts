@@ -1,4 +1,5 @@
 interface DataInit {
+    loadedImage: any;
     drawing: boolean;
     context: any;
     images: any;
@@ -70,7 +71,7 @@ declare const _default: import("vue-demi").DefineComponent<{
     setContext(): Promise<void>;
     clear(): void;
     setBackground(): Promise<void>;
-    drawBackgroundImage(image: any): Promise<void>;
+    drawBackgroundImage(): Promise<void>;
     getCoordinates(event: any): {
         x: any;
         y: any;

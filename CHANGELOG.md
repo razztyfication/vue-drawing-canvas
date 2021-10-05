@@ -1,4 +1,10 @@
-# [v1.0.1](https://github.com/razztyfication/vue-drawing-canvas)
+# [v1.0.2](https://github.com/razztyfication/vue-drawing-canvas)
+
+- Bug Fix Background Image not update after redraw()
+
+<br>
+
+# [v1.0.1](https://github.com/razztyfication/vue-drawing-canvas/tree/v1.0.1)
 
 - Rename file from .vue to .ts
 - Update [README.md](https://github.com/razztyfication/vue-drawing-canvas/blob/master/README.md)

@@ -2,6 +2,7 @@
 import { defineComponent, h, isVue2 } from 'vue-demi';
 
 interface DataInit {
+  loadedImage: any;
   drawing: boolean;
   context: any;
   images: any;
@@ -79,6 +80,7 @@ export default /*#__PURE__*/defineComponent({
   },
   data(): DataInit {
     return {
+      loadedImage: null,
       drawing: false,
       context: null,
       images: [],
@@ -97,6 +99,11 @@ export default /*#__PURE__*/defineComponent({
   mounted() {
     this.setContext();
   },
+  watch: {
+    backgroundImage: function () {
+      this.loadedImage = null
+    }
+  },
   methods: {
     async setContext() {
       let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#VueDrawingCanvas');
@@ -112,16 +119,26 @@ export default /*#__PURE__*/defineComponent({
       this.context.fillStyle = this.backgroundColor;
       this.context.fillRect(0, 0, this.width, this.height);
       
-      if (this.backgroundImage) {
-        const image = new Image();
-        image.src = this.backgroundImage;
-        image.onload = await this.drawBackgroundImage(image);
+      await this.$nextTick(async () => {
+        await this.drawBackgroundImage()
+      })
+      this.save();
+    },
+    async drawBackgroundImage() {
+      if (!this.loadedImage) {
+        return new Promise<void>((resolve, reject) => { 
+          const image = new Image();
+          image.src = this.backgroundImage;
+          image.onload = () => {
+            this.context.drawImage(image, 0, 0, this.width, this.height);
+            this.loadedImage = image
+            resolve();
+          }
+          image.onerror = reject
+        })
+      } else {
+        this.context.drawImage(this.loadedImage, 0, 0, this.width, this.height);
       }
-      this.save();
-    },    
-    async drawBackgroundImage(image) {
-      this.context.drawImage(image, 0, 0, this.width, this.height);
-      this.save();
     },    
     getCoordinates(event) {
       let x, y;
