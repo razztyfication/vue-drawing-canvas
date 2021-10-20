@@ -85,6 +85,7 @@ declare const _default: import("vue-demi").DefineComponent<{
     undo(): void;
     redo(): void;
     redraw(output: boolean): Promise<void>;
+    wrapText(context: any, text: any, x: any, y: any, maxWidth: any, lineHeight: any): void;
     save(): string;
     isEmpty(): boolean;
 }, import("vue-demi").ComponentOptionsMixin, import("vue-demi").ComponentOptionsMixin, Record<string, any>, string, import("vue-demi").VNodeProps & import("vue-demi").AllowedComponentProps & import("vue-demi").ComponentCustomProps, Readonly<{

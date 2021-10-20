@@ -286,7 +286,11 @@ function _defineProperty(obj, key, value) {
                   break;
                 }
 
-                return _context4.abrupt("return", new Promise(function (resolve, reject) {
+                return _context4.abrupt("return", new Promise(function (resolve) {
+                  if (!_this3.backgroundImage) {
+                    resolve();
+                  }
+
                   var image = new Image();
                   image.src = _this3.backgroundImage;
 
@@ -296,8 +300,6 @@ function _defineProperty(obj, key, value) {
                     _this3.loadedImage = image;
                     resolve();
                   };
-
-                  image.onerror = reject;
                 }));
 
               case 4:
@@ -539,6 +541,36 @@ function _defineProperty(obj, key, value) {
         }, _callee5);
       }))();
     },
+    wrapText: function wrapText(context, text, x, y, maxWidth, lineHeight) {
+      var words = text.split(' ');
+      var line = '';
+
+      for (var n = 0; n < words.length; n++) {
+        var testLine = line + words[n] + ' ';
+        var metrics = context.measureText(testLine);
+        var testWidth = metrics.width;
+
+        if (testWidth > maxWidth && n > 0) {
+          if (this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') {
+            context.strokeText(line, x, y);
+            line = words[n] + ' ';
+            y += lineHeight;
+          } else {
+            context.fillText(line, x, y);
+            line = words[n] + ' ';
+            y += lineHeight;
+          }
+        } else {
+          line = testLine;
+        }
+      }
+
+      if (this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') {
+        context.strokeText(line, x, y);
+      } else {
+        context.fillText(line, x, y);
+      }
+    },
     save: function save() {
       var _this7 = this;
 
@@ -596,7 +628,7 @@ function _defineProperty(obj, key, value) {
             ctx.strokeStyle = this.watermark.fontStyle.color;
 
             if (this.watermark.fontStyle && this.watermark.fontStyle.width) {
-              ctx.strokeText(this.watermark.source, this.watermark.x, this.watermark.y, this.watermark.fontStyle.width);
+              this.wrapText(ctx, this.watermark.source, this.watermark.x, this.watermark.y, this.watermark.fontStyle.width, this.watermark.fontStyle.lineHeight);
             } else {
               ctx.strokeText(this.watermark.source, this.watermark.x, this.watermark.y);
             }
@@ -604,7 +636,7 @@ function _defineProperty(obj, key, value) {
             ctx.fillStyle = color;
 
             if (this.watermark.fontStyle && this.watermark.fontStyle.width) {
-              ctx.fillText(this.watermark.source, this.watermark.x, this.watermark.y, this.watermark.fontStyle.width);
+              this.wrapText(ctx, this.watermark.source, this.watermark.x, this.watermark.y, this.watermark.fontStyle.width, this.watermark.fontStyle.lineHeight);
             } else {
               ctx.fillText(this.watermark.source, this.watermark.x, this.watermark.y);
             }

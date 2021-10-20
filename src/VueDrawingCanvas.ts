@@ -126,7 +126,10 @@ export default /*#__PURE__*/defineComponent({
     },
     async drawBackgroundImage() {
       if (!this.loadedImage) {
-        return new Promise<void>((resolve, reject) => { 
+        return new Promise<void>((resolve) => { 
+          if (!this.backgroundImage) {
+            resolve()
+          }
           const image = new Image();
           image.src = this.backgroundImage;
           image.onload = () => {
@@ -134,7 +137,6 @@ export default /*#__PURE__*/defineComponent({
             this.loadedImage = image
             resolve();
           }
-          image.onerror = reject
         })
       } else {
         this.context.drawImage(this.loadedImage, 0, 0, this.width, this.height);
@@ -322,6 +324,40 @@ export default /*#__PURE__*/defineComponent({
         }
       });
     },
+    wrapText(context, text, x, y, maxWidth, lineHeight) {
+      var words = text.split(' ');
+      var line = '';
+
+      for(var n = 0; n < words.length; n++) {
+        var testLine = line + words[n] + ' ';
+        var metrics = context.measureText(testLine);
+        var testWidth = metrics.width;
+        if (testWidth > maxWidth && n > 0) {
+          if((this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') )
+          {
+            context.strokeText(line, x, y);
+            line = words[n] + ' ';
+            y += lineHeight;
+          }
+          else{
+            context.fillText(line, x, y);
+            line = words[n] + ' ';
+            y += lineHeight;
+          }
+
+        }
+        else {
+          line = testLine;
+        }
+      }
+      if((this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') )
+      {
+        context.strokeText(line, x, y);
+      }
+      else{
+        context.fillText(line, x, y);
+      }
+    },
     save() {
       if (this.watermark) {
         let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#VueDrawingCanvas');
@@ -373,14 +409,14 @@ export default /*#__PURE__*/defineComponent({
           if (this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') {
             ctx.strokeStyle = this.watermark.fontStyle.color;
             if (this.watermark.fontStyle && this.watermark.fontStyle.width) {
-              ctx.strokeText(this.watermark.source, this.watermark.x, this.watermark.y, this.watermark.fontStyle.width);
+              this.wrapText(ctx, this.watermark.source,  this.watermark.x,  this.watermark.y, this.watermark.fontStyle.width, this.watermark.fontStyle.lineHeight);
             } else {
               ctx.strokeText(this.watermark.source, this.watermark.x, this.watermark.y);
             }
           } else {
             ctx.fillStyle = color;
             if (this.watermark.fontStyle && this.watermark.fontStyle.width) {
-              ctx.fillText(this.watermark.source, this.watermark.x, this.watermark.y, this.watermark.fontStyle.width);
+              this.wrapText(ctx, this.watermark.source,  this.watermark.x,  this.watermark.y, this.watermark.fontStyle.width, this.watermark.fontStyle.lineHeight);
             } else {
               ctx.fillText(this.watermark.source, this.watermark.x, this.watermark.y);
             }

@@ -1,4 +1,10 @@
-# [v1.0.2](https://github.com/razztyfication/vue-drawing-canvas)
+# [v1.0.3](https://github.com/razztyfication/vue-drawing-canvas)
+
+- Wrap watermark text to multiline. Thanks to [mishahobanov](https://github.com/mishahobanov)
+
+<br>
+
+# [v1.0.2](https://github.com/razztyfication/vue-drawing-canvas/tree/v1.0.2)
 
 - Bug Fix Background Image not update after redraw()
 
