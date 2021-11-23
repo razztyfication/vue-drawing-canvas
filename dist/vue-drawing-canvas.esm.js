@@ -359,38 +359,34 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
         }
       });
     },
+
     wrapText(context, text, x, y, maxWidth, lineHeight) {
       var words = text.split(' ');
       var line = '';
-        
 
-      for(var n = 0; n < words.length; n++) {
+      for (var n = 0; n < words.length; n++) {
         var testLine = line + words[n] + ' ';
         var metrics = context.measureText(testLine);
         var testWidth = metrics.width;
+
         if (testWidth > maxWidth && n > 0) {
-          if((this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') )
-          {
+          if (this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') {
             context.strokeText(line, x, y);
             line = words[n] + ' ';
             y += lineHeight;
-          }
-          else{
+          } else {
             context.fillText(line, x, y);
             line = words[n] + ' ';
             y += lineHeight;
           }
-         
-        }
-        else {
+        } else {
           line = testLine;
         }
       }
-      if((this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') )
-      {
+
+      if (this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') {
         context.strokeText(line, x, y);
-      }
-      else{
+      } else {
         context.fillText(line, x, y);
       }
     },
