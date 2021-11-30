@@ -542,33 +542,44 @@ function _defineProperty(obj, key, value) {
       }))();
     },
     wrapText: function wrapText(context, text, x, y, maxWidth, lineHeight) {
-      var words = text.split(' ');
-      var line = '';
+      var newLineRegex = /(\r\n|\n\r|\n|\r)+/g;
+      var whitespaceRegex = /\s+/g;
+      var lines = text.split(newLineRegex).filter(function (word) {
+        return word.length > 0;
+      });
 
-      for (var n = 0; n < words.length; n++) {
-        var testLine = line + words[n] + ' ';
-        var metrics = context.measureText(testLine);
-        var testWidth = metrics.width;
+      for (var lineNumber = 0; lineNumber < lines.length; lineNumber++) {
+        var words = lines[lineNumber].split(whitespaceRegex).filter(function (word) {
+          return word.length > 0;
+        });
+        var line = '';
 
-        if (testWidth > maxWidth && n > 0) {
-          if (this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') {
-            context.strokeText(line, x, y);
+        for (var n = 0; n < words.length; n++) {
+          var testLine = line + words[n] + ' ';
+          var metrics = context.measureText(testLine);
+          var testWidth = metrics.width;
+
+          if (testWidth > maxWidth && n > 0) {
+            if (this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') {
+              context.strokeText(line, x, y);
+            } else {
+              context.fillText(line, x, y);
+            }
+
             line = words[n] + ' ';
             y += lineHeight;
           } else {
-            context.fillText(line, x, y);
-            line = words[n] + ' ';
-            y += lineHeight;
+            line = testLine;
           }
-        } else {
-          line = testLine;
         }
-      }
 
-      if (this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') {
-        context.strokeText(line, x, y);
-      } else {
-        context.fillText(line, x, y);
+        if (this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') {
+          context.strokeText(line, x, y);
+        } else {
+          context.fillText(line, x, y);
+        }
+
+        y += words.length > 0 ? lineHeight : 0;
       }
     },
     save: function save() {

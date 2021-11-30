@@ -1,4 +1,39 @@
-# [v1.0.3](https://github.com/razztyfication/vue-drawing-canvas)
+# [v1.0.4](https://github.com/razztyfication/vue-drawing-canvas)
+
+- Reworked multiline of text for watermark
+
+example:
+
+```js
+export default {
+  ...
+  data() {
+    return {
+      ...
+      watermark: {
+        type: "Text",
+        source: `This is\nWatermark
+        TEXT`,
+        x: 200,
+        y: 180,
+        fontStyle: {
+          width: 200,
+          lineHeight: 48,
+          color: '#FF0000',
+          font: 'bold 48px roboto',
+          drawType: 'fill',
+          textAlign: 'left',
+          textBaseline: 'top',
+          rotate: 0
+        }
+      }
+    }
+}
+```
+
+<br>
+
+# [v1.0.3](https://github.com/razztyfication/vue-drawing-canvas/tree/v1.0.3)
 
 - Wrap watermark text to multiline. Thanks to [mishahobanov](https://github.com/mishahobanov)
 
