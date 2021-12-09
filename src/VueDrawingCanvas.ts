@@ -190,7 +190,8 @@ export default /*#__PURE__*/defineComponent({
               coordinates = [
                 { x: coordinate.x, y: this.strokes.from.y },
                 { x: coordinate.x, y: coordinate.y },
-                { x: this.strokes.from.x, y: coordinate.y }
+                { x: this.strokes.from.x, y: coordinate.y }, 
+                {x: this.strokes.from.x, y: this.strokes.from.y}
               ];
               break;
             case 'triangle':
@@ -198,13 +199,15 @@ export default /*#__PURE__*/defineComponent({
               let width = this.strokes.from.x < coordinate.x ? this.strokes.from.x + center : this.strokes.from.x - center;
               coordinates = [
                 { x: coordinate.x, y: this.strokes.from.y },
-                { x: width, y: coordinate.y }
+                { x: width, y: coordinate.y }, 
+                {x: this.strokes.from.x, y: this.strokes.from.y}
               ];
               break;
             case 'half_triangle':
               coordinates = [
                 { x: coordinate.x, y: this.strokes.from.y },
-                { x: this.strokes.from.x, y: coordinate.y }
+                { x: this.strokes.from.x, y: coordinate.y }, 
+                {x: this.strokes.from.x, y: this.strokes.from.y}
               ];
               break;
             case 'circle':
