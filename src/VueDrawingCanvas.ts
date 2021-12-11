@@ -129,6 +129,7 @@ export default /*#__PURE__*/defineComponent({
         return new Promise<void>((resolve) => { 
           if (!this.backgroundImage) {
             resolve()
+            return;
           }
           const image = new Image();
           image.src = this.backgroundImage;

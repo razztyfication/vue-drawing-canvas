@@ -126,6 +126,7 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
         return new Promise(resolve => {
           if (!this.backgroundImage) {
             resolve();
+            return;
           }
 
           const image = new Image();
@@ -202,6 +203,9 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
               }, {
                 x: this.strokes.from.x,
                 y: coordinate.y
+              }, {
+                x: this.strokes.from.x,
+                y: this.strokes.from.y
               }];
               break;
 
@@ -214,6 +218,9 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
               }, {
                 x: width,
                 y: coordinate.y
+              }, {
+                x: this.strokes.from.x,
+                y: this.strokes.from.y
               }];
               break;
 
@@ -224,6 +231,9 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
               }, {
                 x: this.strokes.from.x,
                 y: coordinate.y
+              }, {
+                x: this.strokes.from.x,
+                y: this.strokes.from.y
               }];
               break;
 

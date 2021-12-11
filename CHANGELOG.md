@@ -1,4 +1,11 @@
-# [v1.0.4](https://github.com/razztyfication/vue-drawing-canvas)
+# [v1.0.5](https://github.com/razztyfication/vue-drawing-canvas)
+
+- BUG FIX missing side when drawing shapes
+- BUG FIX add missing return on null background image
+
+<br>
+
+# [v1.0.4](https://github.com/razztyfication/vue-drawing-canvas/tree/v1.0.4)
 
 - Reworked multiline of text for watermark
 

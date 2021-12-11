@@ -289,6 +289,7 @@ function _defineProperty(obj, key, value) {
                 return _context4.abrupt("return", new Promise(function (resolve) {
                   if (!_this3.backgroundImage) {
                     resolve();
+                    return;
                   }
 
                   var image = new Image();
@@ -371,6 +372,9 @@ function _defineProperty(obj, key, value) {
               }, {
                 x: this.strokes.from.x,
                 y: coordinate.y
+              }, {
+                x: this.strokes.from.x,
+                y: this.strokes.from.y
               }];
               break;
 
@@ -383,6 +387,9 @@ function _defineProperty(obj, key, value) {
               }, {
                 x: width,
                 y: coordinate.y
+              }, {
+                x: this.strokes.from.x,
+                y: this.strokes.from.y
               }];
               break;
 
@@ -393,6 +400,9 @@ function _defineProperty(obj, key, value) {
               }, {
                 x: this.strokes.from.x,
                 y: coordinate.y
+              }, {
+                x: this.strokes.from.x,
+                y: this.strokes.from.y
               }];
               break;
 
