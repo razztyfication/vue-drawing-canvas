@@ -174,6 +174,12 @@ function _defineProperty(obj, key, value) {
       default: function _default() {
         return 'png';
       }
+    },
+    canvasId: {
+      type: String,
+      default: function _default() {
+        return 'VueDrawingCanvas';
+      }
     }
   },
   data: function data() {
@@ -215,7 +221,7 @@ function _defineProperty(obj, key, value) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                canvas = document.querySelector('#VueDrawingCanvas');
+                canvas = document.querySelector('#' + _this.canvasId);
                 _this.context = _this.context ? _this.context : canvas.getContext('2d');
                 _context.next = 4;
                 return _this.setBackground();
@@ -318,7 +324,7 @@ function _defineProperty(obj, key, value) {
       var x, y;
 
       if (event.touches && event.touches.length > 0) {
-        var canvas = document.querySelector('#VueDrawingCanvas');
+        var canvas = document.querySelector('#' + this.canvasId);
         var rect = canvas.getBoundingClientRect();
         x = event.touches[0].clientX - rect.left;
         y = event.touches[0].clientY - rect.top;
@@ -596,7 +602,7 @@ function _defineProperty(obj, key, value) {
       var _this7 = this;
 
       if (this.watermark) {
-        var canvas = document.querySelector('#VueDrawingCanvas');
+        var canvas = document.querySelector('#' + this.canvasId);
         var temp = document.createElement('canvas');
         var ctx = temp.getContext('2d');
         temp.width = this.width;
@@ -667,7 +673,7 @@ function _defineProperty(obj, key, value) {
           return temp.toDataURL('image/' + this.saveAs, 1);
         }
       } else {
-        var _canvas = document.querySelector('#VueDrawingCanvas');
+        var _canvas = document.querySelector('#' + this.canvasId);
 
         this.$emit('update:image', _canvas.toDataURL('image/' + this.saveAs, 1));
         return _canvas.toDataURL('image/' + this.saveAs, 1);
@@ -683,7 +689,7 @@ function _defineProperty(obj, key, value) {
     if (vueDemi.isVue2) {
       return vueDemi.h('canvas', _objectSpread2({
         attrs: {
-          id: 'VueDrawingCanvas',
+          id: this.canvasId,
           width: this.width,
           height: this.height
         },
@@ -724,7 +730,7 @@ function _defineProperty(obj, key, value) {
     }
 
     return vueDemi.h('canvas', {
-      id: 'VueDrawingCanvas',
+      id: this.canvasId,
       height: this.height,
       width: this.width,
       style: _objectSpread2({

@@ -66,6 +66,10 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
         return ['jpeg', 'png'].indexOf(value) !== -1;
       },
       default: () => 'png'
+    },
+    canvasId: {
+      type: String,
+      default: () => 'VueDrawingCanvas'
     }
   },
 
@@ -102,7 +106,7 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
   },
   methods: {
     async setContext() {
-      let canvas = document.querySelector('#VueDrawingCanvas');
+      let canvas = document.querySelector('#' + this.canvasId);
       this.context = this.context ? this.context : canvas.getContext('2d');
       await this.setBackground();
     },
@@ -147,7 +151,7 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
       let x, y;
 
       if (event.touches && event.touches.length > 0) {
-        let canvas = document.querySelector('#VueDrawingCanvas');
+        let canvas = document.querySelector('#' + this.canvasId);
         let rect = canvas.getBoundingClientRect();
         x = event.touches[0].clientX - rect.left;
         y = event.touches[0].clientY - rect.top;
@@ -410,7 +414,7 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
 
     save() {
       if (this.watermark) {
-        let canvas = document.querySelector('#VueDrawingCanvas');
+        let canvas = document.querySelector('#' + this.canvasId);
         let temp = document.createElement('canvas');
         let ctx = temp.getContext('2d');
         temp.width = this.width;
@@ -479,7 +483,7 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
           return temp.toDataURL('image/' + this.saveAs, 1);
         }
       } else {
-        let canvas = document.querySelector('#VueDrawingCanvas');
+        let canvas = document.querySelector('#' + this.canvasId);
         this.$emit('update:image', canvas.toDataURL('image/' + this.saveAs, 1));
         return canvas.toDataURL('image/' + this.saveAs, 1);
       }
@@ -495,7 +499,7 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
     if (isVue2) {
       return h('canvas', {
         attrs: {
-          id: 'VueDrawingCanvas',
+          id: this.canvasId,
           width: this.width,
           height: this.height
         },
@@ -520,7 +524,7 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
     }
 
     return h('canvas', {
-      id: 'VueDrawingCanvas',
+      id: this.canvasId,
       height: this.height,
       width: this.width,
       style: {
