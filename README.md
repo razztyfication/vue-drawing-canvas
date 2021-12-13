@@ -74,23 +74,24 @@ export default {
 
 <br>
 
-| Name            | Type                  | Default Value | Description                                                                                                                      |
-|-----------------|:---------------------:|:-------------:|----------------------------------------------------------------------------------------------------------------------------------|
-| width           | String, Number        | `600`         | Specifies canvas width                                                                                                           |
-| height          | String, Number        | `400`         | Specifies canvas height                                                                                                          |
-| image           | String                |               | Your v-model to get canvas output to an base64 image                                                                             |
-| strokeType      | String                | `"dash"`      | Specifies stroke type to draw on canvas.<br><br>Accepted value `"dash"`, `"circle"`, `"square"`, `"triangle"`, `"half_triangle"` |
-| fillShape       | Boolean               | `false`       | Specifies if the shape must be filled with the current fill style                                                                |
-| eraser          | Boolean               | `false`       | Props to change state from drawing to erasing                                                                                    |
-| color           | String                | `"#000000"`   | Specifies the color, gradient, or pattern to use for the strokes                                                                 |
-| lineWidth       | Number                | `5`           | Sets the thickness of line                                                                                                       |
-| lock            | Boolean               | `false`       | Lock canvas for drawing                                                                                                          |
-| backgroundColor | String                | `"#FFFFFF"`   | Set background color on your canvas                                                                                              |
-| backgroundImage | String                |               | Set background image on your canvas<br><br>**_Be carefull for performance issue when using this props !!_**                      |
-| classes         | Array, String, Object |               | Specifies your own classes to canvas                                                                                             |
-| styles          | Array, String, Object |               | Specifies your own styles to canvas                                                                                              |
-| watermark       | Object                |               | Put watermark text/image on your image output<br><br>(see details in the next section below)                                     |
-| saveAs          | String                | `"png"`       | Specifies output type. This props accept either `"png"` or `"jpeg"`                                                              |
+| Name            |          Type         |    Default Value   | Description                                                                                                                      |
+| --------------- | :-------------------: | :----------------: | -------------------------------------------------------------------------------------------------------------------------------- |
+| canvasId        | String                | `VueDrawingCanvas` | Specifies your canvas                                                                                                            |
+| width           | String, Number        | `600`              | Specifies canvas width                                                                                                           |
+| height          | String, Number        | `400`              | Specifies canvas height                                                                                                          |
+| image           | String                |                    | Your v-model to get canvas output to an base64 image                                                                             |
+| strokeType      | String                | `"dash"`           | Specifies stroke type to draw on canvas.<br><br>Accepted value `"dash"`, `"circle"`, `"square"`, `"triangle"`, `"half_triangle"` |
+| fillShape       | Boolean               | `false`            | Specifies if the shape must be filled with the current fill style                                                                |
+| eraser          | Boolean               | `false`            | Props to change state from drawing to erasing                                                                                    |
+| color           | String                | `"#000000"`        | Specifies the color, gradient, or pattern to use for the strokes                                                                 |
+| lineWidth       | Number                | `5`                | Sets the thickness of line                                                                                                       |
+| lock            | Boolean               | `false`            | Lock canvas for drawing                                                                                                          |
+| backgroundColor | String                | `"#FFFFFF"`        | Set background color on your canvas                                                                                              |
+| backgroundImage | String                |                    | Set background image on your canvas<br><br>***Be carefull for performance issue when using this props !!***                      |
+| classes         | Array, String, Object |                    | Specifies your own classes to canvas                                                                                             |
+| styles          | Array, String, Object |                    | Specifies your own styles to canvas                                                                                              |
+| watermark       | Object                |                    | Put watermark text/image on your image output<br><br>(see details in the next section below)                                     |
+| saveAs          | String                | `"png"`            | Specifies output type. This props accept either `"png"` or `"jpeg"`                                                              |
 
 <br>
 

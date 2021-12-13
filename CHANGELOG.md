@@ -1,4 +1,10 @@
-# [v1.0.5](https://github.com/razztyfication/vue-drawing-canvas)
+# [v1.0.6](https://github.com/razztyfication/vue-drawing-canvas)
+
+- Added new props **canvasId** to allow multiple canvas on one page. Thank to [mortegro](https://github.com/mortegro)
+
+<br>
+
+# [v1.0.5](https://github.com/razztyfication/vue-drawing-canvas/tree/v1.0.5)
 
 - BUG FIX missing side when drawing shapes
 - BUG FIX add missing return on null background image
