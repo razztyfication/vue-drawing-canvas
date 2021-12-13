@@ -67,6 +67,10 @@ declare const _default: import("vue-demi").DefineComponent<{
         validator: (value: string) => boolean;
         default: () => string;
     };
+    canvasId: {
+        type: StringConstructor;
+        default: () => string;
+    };
 }, unknown, DataInit, {}, {
     setContext(): Promise<void>;
     clear(): void;
@@ -104,6 +108,7 @@ declare const _default: import("vue-demi").DefineComponent<{
     backgroundImage?: unknown;
     watermark?: unknown;
     saveAs?: unknown;
+    canvasId?: unknown;
 } & {
     strokeType: string;
     fillShape: boolean;
@@ -116,6 +121,7 @@ declare const _default: import("vue-demi").DefineComponent<{
     lock: boolean;
     backgroundColor: string;
     saveAs: string;
+    canvasId: string;
 } & {
     styles?: unknown;
     classes?: unknown;
@@ -134,5 +140,6 @@ declare const _default: import("vue-demi").DefineComponent<{
     backgroundColor: string;
     backgroundImage: string;
     saveAs: string;
+    canvasId: string;
 }>;
 export default _default;

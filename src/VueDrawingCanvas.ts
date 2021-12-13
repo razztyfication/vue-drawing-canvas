@@ -76,6 +76,10 @@ export default /*#__PURE__*/defineComponent({
         return ['jpeg', 'png'].indexOf(value) !== -1
       },
       default: () => 'png'
+    },
+    canvasId: {
+      type: String,
+      default: () => 'VueDrawingCanvas'
     }
   },
   data(): DataInit {
@@ -106,7 +110,7 @@ export default /*#__PURE__*/defineComponent({
   },
   methods: {
     async setContext() {
-      let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#VueDrawingCanvas');
+      let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#'+this.canvasId);
       this.context = this.context ? this.context : canvas.getContext('2d');
       
       await this.setBackground();
@@ -146,7 +150,7 @@ export default /*#__PURE__*/defineComponent({
     getCoordinates(event) {
       let x, y;
       if (event.touches && event.touches.length > 0) {
-        let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#VueDrawingCanvas');
+        let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#'+this.canvasId);
         let rect = canvas.getBoundingClientRect();
         x = (event.touches[0].clientX - rect.left);
         y = (event.touches[0].clientY - rect.top);
@@ -367,7 +371,7 @@ export default /*#__PURE__*/defineComponent({
     },
     save() {
       if (this.watermark) {
-        let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#VueDrawingCanvas');
+        let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#'+this.canvasId);
         let temp: HTMLCanvasElement = <HTMLCanvasElement>document.createElement('canvas');
         let ctx = temp.getContext('2d');
         temp.width = this.width;
@@ -432,7 +436,7 @@ export default /*#__PURE__*/defineComponent({
           return(temp.toDataURL('image/' + this.saveAs, 1));
         }
       } else {
-        let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#VueDrawingCanvas');
+        let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#'+this.canvasId);
         this.$emit('update:image', canvas.toDataURL('image/' + this.saveAs, 1));
         return canvas.toDataURL('image/' + this.saveAs, 1);
       }
@@ -445,7 +449,7 @@ export default /*#__PURE__*/defineComponent({
     if (isVue2) {
       return h('canvas', {
         attrs: {
-          id: 'VueDrawingCanvas',
+          id: this.canvasId,
           width: this.width,
           height: this.height
         },
@@ -469,7 +473,7 @@ export default /*#__PURE__*/defineComponent({
       });
     }
     return h('canvas', {
-      id: 'VueDrawingCanvas',
+      id: this.canvasId,
       height: this.height,
       width: this.width,
       style: {
