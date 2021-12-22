@@ -80,6 +80,10 @@ export default /*#__PURE__*/defineComponent({
     canvasId: {
       type: String,
       default: () => 'VueDrawingCanvas'
+    },
+    initialImage: {
+      type: Array,
+      default: () => []
     }
   },
   data(): DataInit {
@@ -102,6 +106,9 @@ export default /*#__PURE__*/defineComponent({
   },
   mounted() {
     this.setContext();
+    this.$nextTick(() => {
+      this.drawInitialImage()
+    })
   },
   watch: {
     backgroundImage: function () {
@@ -114,6 +121,12 @@ export default /*#__PURE__*/defineComponent({
       this.context = this.context ? this.context : canvas.getContext('2d');
       
       await this.setBackground();
+    },
+    drawInitialImage() {
+      if (this.initialImage.length > 0) {
+        this.images = [].concat(this.images, this.initialImage)
+        this.redraw()
+      }
     },
     clear() {
       this.context.clearRect(0, 0, this.width, this.height);
@@ -443,6 +456,9 @@ export default /*#__PURE__*/defineComponent({
     },
     isEmpty() {
       return this.images.length > 0 ? false : true;
+    },
+    getAllStrokes() {
+      return this.images;
     }
   },
   render() {

@@ -1,4 +1,13 @@
-# [v1.0.6](https://github.com/razztyfication/vue-drawing-canvas)
+# [v1.0.7](https://github.com/razztyfication/vue-drawing-canvas)
+
+- Added new method **getAllStrokes()** to get all strokes and shapes from canvas.
+- Added new prop **initialImage** to draw all strokes and shapes from previously worked canvas.
+
+See [demo](https://codesandbox.io/s/vue-drawing-canvas-107-rc1-dcoiy) to see it in action.
+
+<br>
+
+# [v1.0.6](https://github.com/razztyfication/vue-drawing-canvas/tree/v1.0.6)
 
 - Added new props **canvasId** to allow multiple canvas on one page. Thank to [mortegro](https://github.com/mortegro)
 

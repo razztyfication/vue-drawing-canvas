@@ -76,7 +76,7 @@ export default {
 
 | Name            |          Type         |    Default Value   | Description                                                                                                                      |
 | --------------- | :-------------------: | :----------------: | -------------------------------------------------------------------------------------------------------------------------------- |
-| canvasId        | String                | `VueDrawingCanvas` | Specifies your canvas                                                                                                            |
+| canvasId        | String                | `VueDrawingCanvas` | Specifies your canvas id                                                                                                         |
 | width           | String, Number        | `600`              | Specifies canvas width                                                                                                           |
 | height          | String, Number        | `400`              | Specifies canvas height                                                                                                          |
 | image           | String                |                    | Your v-model to get canvas output to an base64 image                                                                             |
@@ -88,6 +88,7 @@ export default {
 | lock            | Boolean               | `false`            | Lock canvas for drawing                                                                                                          |
 | backgroundColor | String                | `"#FFFFFF"`        | Set background color on your canvas                                                                                              |
 | backgroundImage | String                |                    | Set background image on your canvas<br><br>***Be carefull for performance issue when using this props !!***                      |
+| initialImage    | Array                 | `[]`               | Draw strokes and shapes from canvas you've worked before. [Demo](https://codesandbox.io/s/vue-drawing-canvas-107-rc1-dcoiy)      |
 | classes         | Array, String, Object |                    | Specifies your own classes to canvas                                                                                             |
 | styles          | Array, String, Object |                    | Specifies your own styles to canvas                                                                                              |
 | watermark       | Object                |                    | Put watermark text/image on your image output<br><br>(see details in the next section below)                                     |
@@ -211,14 +212,15 @@ export default {
 
 <br>
 
-| Method Name           | Return Value      | Description                                           |
-|-----------------------|:-----------------:|-------------------------------------------------------|
-| getCoordinates(event) | `{ x: 0, y: 0 }`  | Get x-axis and y-axis coordinates from current canvas |
-| reset()               |                   | Reset current canvas to new state                     |
-| undo()                |                   | Remove last drawing stroke on current canvas          |
-| redo()                |                   | Re-draw last removed stroke on current canvas         |
-| redraw()              |                   | Redraw all strokes on current canvas                  |
-| isEmpty()             | `true` or `false` | Get current canvas empty state                        |
+| Method Name           | Return Value                    | Description                                           |
+|-----------------------|:-------------------------------:|-------------------------------------------------------|
+| getCoordinates(event) | `{ x: 0, y: 0 }`                | Get x-axis and y-axis coordinates from current canvas |
+| reset()               |                                 | Reset current canvas to new state                     |
+| undo()                |                                 | Remove last drawing stroke on current canvas          |
+| redo()                |                                 | Re-draw last removed stroke on current canvas         |
+| redraw()              |                                 | Redraw all strokes on current canvas                  |
+| isEmpty()             | `true` or `false`               | Get current canvas empty state                        |
+| getAllStrokes()       | _`Array of strokes and shapes`_ | Get all strokes and shapes from canvas                |
 
 <br><br>
 

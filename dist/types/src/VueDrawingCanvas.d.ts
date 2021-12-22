@@ -71,8 +71,13 @@ declare const _default: import("vue-demi").DefineComponent<{
         type: StringConstructor;
         default: () => string;
     };
+    initialImage: {
+        type: ArrayConstructor;
+        default: () => any[];
+    };
 }, unknown, DataInit, {}, {
     setContext(): Promise<void>;
+    drawInitialImage(): void;
     clear(): void;
     setBackground(): Promise<void>;
     drawBackgroundImage(): Promise<void>;
@@ -92,6 +97,7 @@ declare const _default: import("vue-demi").DefineComponent<{
     wrapText(context: any, text: any, x: any, y: any, maxWidth: any, lineHeight: any): void;
     save(): string;
     isEmpty(): boolean;
+    getAllStrokes(): any;
 }, import("vue-demi").ComponentOptionsMixin, import("vue-demi").ComponentOptionsMixin, Record<string, any>, string, import("vue-demi").VNodeProps & import("vue-demi").AllowedComponentProps & import("vue-demi").ComponentCustomProps, Readonly<{
     strokeType?: unknown;
     fillShape?: unknown;
@@ -109,6 +115,7 @@ declare const _default: import("vue-demi").DefineComponent<{
     watermark?: unknown;
     saveAs?: unknown;
     canvasId?: unknown;
+    initialImage?: unknown;
 } & {
     strokeType: string;
     fillShape: boolean;
@@ -122,12 +129,14 @@ declare const _default: import("vue-demi").DefineComponent<{
     backgroundColor: string;
     saveAs: string;
     canvasId: string;
+    initialImage: unknown[];
 } & {
-    styles?: unknown;
-    classes?: unknown;
     backgroundImage?: string;
+    styles?: string | unknown[] | Record<string, any>;
+    classes?: string | unknown[] | Record<string, any>;
     watermark?: Record<string, any>;
 }>, {
+    backgroundImage: string;
     strokeType: string;
     fillShape: boolean;
     width: string | number;
@@ -138,8 +147,8 @@ declare const _default: import("vue-demi").DefineComponent<{
     lineWidth: number;
     lock: boolean;
     backgroundColor: string;
-    backgroundImage: string;
     saveAs: string;
     canvasId: string;
+    initialImage: unknown[];
 }>;
 export default _default;

@@ -9,6 +9,7 @@ export default defineComponent({
   },
   data() {
     return {
+      initialImage: [],
       x: 0,
       y: 0,
       image: '',
@@ -43,6 +44,11 @@ export default defineComponent({
       // }
     }
   },
+  mounted() {
+    if ('vue-drawing-canvas' in window.localStorage) {
+      this.initialImage = JSON.parse(window.localStorage.getItem('vue-drawing-canvas'))
+    }
+  },
   methods: {
     async setImage(event) {
       let URL = window.URL;
@@ -67,6 +73,14 @@ export default defineComponent({
       let coordinates = this.$refs.VueCanvasDrawing.getCoordinates(event);
       this.x = coordinates.x;
       this.y = coordinates.y;
+    },
+    getStrokes() {
+      window.localStorage.setItem('vue-drawing-canvas', JSON.stringify(this.$refs.VueCanvasDrawing.getAllStrokes()));
+      alert('Strokes saved, reload your browser to see the canvas with previously saved image')
+    },
+    removeSavedStrokes() {
+      window.localStorage.removeItem('vue-drawing-canvas');
+      alert('Strokes cleared from local storage')
     }
   }
 });
@@ -88,6 +102,7 @@ export default defineComponent({
           :background-color="backgroundColor"
           :background-image="backgroundImage"
           :watermark="watermark"
+          :initial-image="initialImage"
           saveAs="jpeg"
           :styles="{
             'border': 'solid 1px #000'
@@ -184,6 +199,20 @@ export default defineComponent({
               </svg>
               Stroke
             </span>
+          </button>
+        </div>
+        <div class="button-container">
+          <button type="button" @click.prevent="getStrokes()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-image-alt" viewBox="0 0 16 16">
+              <path d="M7 2.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0zm4.225 4.053a.5.5 0 0 0-.577.093l-3.71 4.71-2.66-2.772a.5.5 0 0 0-.63.062L.002 13v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4.5l-4.777-3.947z"/>
+            </svg>
+            Save All Strokes
+          </button>
+          <button type="button" @click.prevent="removeSavedStrokes()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eraser" viewBox="0 0 16 16">
+              <path d="M8.086 2.207a2 2 0 0 1 2.828 0l3.879 3.879a2 2 0 0 1 0 2.828l-5.5 5.5A2 2 0 0 1 7.879 15H5.12a2 2 0 0 1-1.414-.586l-2.5-2.5a2 2 0 0 1 0-2.828l6.879-6.879zm2.121.707a1 1 0 0 0-1.414 0L4.16 7.547l5.293 5.293 4.633-4.633a1 1 0 0 0 0-1.414l-3.879-3.879zM8.746 13.547 3.453 8.254 1.914 9.793a1 1 0 0 0 0 1.414l2.5 2.5a1 1 0 0 0 .707.293H7.88a1 1 0 0 0 .707-.293l.16-.16z"/>
+            </svg>
+            Remove Saved Strokes
           </button>
         </div>
         <div class="button-container">
