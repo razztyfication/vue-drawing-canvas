@@ -732,6 +732,21 @@ function _defineProperty(obj, key, value) {
           },
           touchcancel: function touchcancel(event) {
             return _this9.stopDraw(event);
+          },
+          pointerdown: function pointerdown(event) {
+            return _this9.startDraw(event);
+          },
+          pointermove: function pointermove(event) {
+            return _this9.draw(event);
+          },
+          pointerup: function pointerup(event) {
+            return _this9.stopDraw(event);
+          },
+          pointerleave: function pointerleave(event) {
+            return _this9.stopDraw(event);
+          },
+          pointercancel: function pointercancel(event) {
+            return _this9.stopDraw(event);
           }
         }
       }, this.$props));
@@ -770,6 +785,21 @@ function _defineProperty(obj, key, value) {
         return _this9.stopDraw($event);
       },
       onTouchcancel: function onTouchcancel($event) {
+        return _this9.stopDraw($event);
+      },
+      onPointerdown: function onPointerdown($event) {
+        return _this9.startDraw($event);
+      },
+      onPointermove: function onPointermove($event) {
+        return _this9.draw($event);
+      },
+      onPointerup: function onPointerup($event) {
+        return _this9.stopDraw($event);
+      },
+      onPointerleave: function onPointerleave($event) {
+        return _this9.stopDraw($event);
+      },
+      onPointercancel: function onPointercancel($event) {
         return _this9.stopDraw($event);
       }
     });

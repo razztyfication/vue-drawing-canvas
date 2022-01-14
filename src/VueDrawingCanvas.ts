@@ -486,7 +486,9 @@ export default /*#__PURE__*/defineComponent({
           touchcancel: event => this.stopDraw(event),
           pointerdown: event => this.startDraw(event),
 		      pointermove: event => this.draw(event),
-		      pointerup: event => this.stopDraw(event)
+		      pointerup: event => this.stopDraw(event),
+          pointerleave: event => this.stopDraw(event),
+          pointercancel: event => this.stopDraw(event),
         },
         ...this.$props
       });
@@ -511,7 +513,9 @@ export default /*#__PURE__*/defineComponent({
       onTouchcancel: $event => this.stopDraw($event),
       onPointerdown: $event => this.startDraw($event),
       onPointermove: $event => this.draw($event),
-      onPointerup: $event => this.stopDraw($event)
+      onPointerup: $event => this.stopDraw($event),
+      onPointerleave: $event => this.stopDraw($event),
+      onPointercancel: $event => this.stopDraw($event)
     });
   }
 });

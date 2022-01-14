@@ -1,4 +1,10 @@
-# [v1.0.7](https://github.com/razztyfication/vue-drawing-canvas)
+# [v1.0.8](https://github.com/razztyfication/vue-drawing-canvas)
+
+- BUG FIX not working on drawing tablet and stylus
+
+<br>
+
+# [v1.0.7](https://github.com/razztyfication/vue-drawing-canvas/tree/v1.0.7)
 
 - Added new method **getAllStrokes()** to get all strokes and shapes from canvas.
 - Added new prop **initialImage** to draw all strokes and shapes from previously worked canvas.
