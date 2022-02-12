@@ -1,4 +1,13 @@
-# [v1.0.8](https://github.com/razztyfication/vue-drawing-canvas)
+# [v1.0.9](https://github.com/razztyfication/vue-drawing-canvas)
+
+- BUG FIX redraw function with wrong stroke type
+- BUG FIX typescript type declaration not compatible with `noImplicitAny`
+- Added new prop **additionalImages** will accept Array of `watermark` Object to draw either text or insert multiple image on canvas
+- Remove build for `ssr` and `unpkg`
+
+<br>
+
+# [v1.0.8](https://github.com/razztyfication/vue-drawing-canvas/tree/v1.0.8)
 
 - BUG FIX not working on drawing tablet and stylus
 

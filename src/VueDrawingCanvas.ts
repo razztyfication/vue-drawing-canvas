@@ -1,5 +1,31 @@
 /* eslint-disable no-debugger, no-console */
+
 import { defineComponent, h, isVue2 } from 'vue-demi';
+
+interface WatermarkImageStyle {
+  width: number,
+  height: number
+}
+
+interface WatermarkFontStyle {
+  width: number,
+  lineHeight: number,
+  color: string,
+  font: string,
+  drawType: string,
+  textAlign: string,
+  textBaseline: string,
+  rotate: number
+}
+
+interface WatermarkData {
+  type: string,
+  source: string,
+  x: number,
+  y: number,
+  imageStyle?: WatermarkImageStyle,
+  fontStyle?: WatermarkFontStyle
+}
 
 interface DataInit {
   loadedImage: any;
@@ -16,7 +42,7 @@ export default /*#__PURE__*/defineComponent({
   props: {
     strokeType: {
       type: String,
-      validator: (value: string) => {
+      validator: (value: string): boolean => {
         return ['dash', 'square', 'circle', 'triangle', 'half_triangle'].indexOf(value) !== -1
       },
       default: () => 'dash'
@@ -65,10 +91,11 @@ export default /*#__PURE__*/defineComponent({
     },
     backgroundImage: {
       type: String,
-      default: () => null
+      default: (): null | string => null
     },
     watermark: {
-      type: Object
+      type: Object,
+      default: (): null | WatermarkData => null
     },
     saveAs: {
       type: String,
@@ -83,7 +110,11 @@ export default /*#__PURE__*/defineComponent({
     },
     initialImage: {
       type: Array,
-      default: () => []
+      default: (): any => []
+    },
+    additionalImages: {
+      type: Array,
+      default: (): any => []
     }
   },
   data(): DataInit {
@@ -108,6 +139,7 @@ export default /*#__PURE__*/defineComponent({
     this.setContext();
     this.$nextTick(() => {
       this.drawInitialImage()
+      this.drawAdditionalImages()
     })
   },
   watch: {
@@ -123,9 +155,18 @@ export default /*#__PURE__*/defineComponent({
       await this.setBackground();
     },
     drawInitialImage() {
-      if (this.initialImage.length > 0) {
+      if (this.initialImage && this.initialImage.length > 0) {
+        // @ts-ignore
         this.images = [].concat(this.images, this.initialImage)
-        this.redraw()
+        this.redraw(true)
+      }
+    },
+    drawAdditionalImages() {
+      if (this.additionalImages && this.additionalImages.length > 0) {
+        let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#'+this.canvasId);
+        this.additionalImages.forEach((watermarkObject: any) => {
+          this.drawWatermark(canvas, this.context, watermarkObject)
+        });
       }
     },
     clear() {
@@ -160,23 +201,23 @@ export default /*#__PURE__*/defineComponent({
         this.context.drawImage(this.loadedImage, 0, 0, this.width, this.height);
       }
     },    
-    getCoordinates(event) {
+    getCoordinates(event: Event) {
       let x, y;
-      if (event.touches && event.touches.length > 0) {
+      if ((<TouchEvent>event).touches && (<TouchEvent>event).touches.length > 0) {
         let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#'+this.canvasId);
         let rect = canvas.getBoundingClientRect();
-        x = (event.touches[0].clientX - rect.left);
-        y = (event.touches[0].clientY - rect.top);
+        x = ((<TouchEvent>event).touches[0].clientX - rect.left);
+        y = ((<TouchEvent>event).touches[0].clientY - rect.top);
       } else {
-        x = event.offsetX;
-        y = event.offsetY;
+        x = (<MouseEvent>event).offsetX;
+        y = (<MouseEvent>event).offsetY;
       }
       return {
         x: x,
         y: y
       }
     },
-    startDraw(event) {
+    startDraw(event: Event) {
       if (!this.lock) {
         this.drawing = true;
 
@@ -192,7 +233,7 @@ export default /*#__PURE__*/defineComponent({
         this.guides = [];
       }
     },
-    draw(event) {
+    draw(event: Event) {
       if (this.drawing) {
         if (!this.context) {
           this.setContext();
@@ -241,7 +282,7 @@ export default /*#__PURE__*/defineComponent({
         }
       }
     },
-    drawGuide(closingPath) {
+    drawGuide(closingPath: boolean) {
       this.redraw(false);
       this.context.strokeStyle = '#000000';
       this.context.lineWidth = 1;
@@ -254,7 +295,7 @@ export default /*#__PURE__*/defineComponent({
         this.context.ellipse(this.guides[0].x, this.guides[0].y, this.guides[1].x, this.guides[1].y, 0, 0, Math.PI * 2);
       } else {
         this.context.moveTo(this.strokes.from.x, this.strokes.from.y);
-        this.guides.forEach((coordinate) => {
+        this.guides.forEach((coordinate: {x: number, y: number}) => {
           this.context.lineTo(coordinate.x, coordinate.y);
         });
         if (closingPath) {
@@ -263,7 +304,7 @@ export default /*#__PURE__*/defineComponent({
       }
       this.context.stroke();
     },
-    drawShape(strokes, closingPath) {
+    drawShape(strokes: any, closingPath: boolean) {
       this.context.strokeStyle = strokes.color;
       this.context.fillStyle = strokes.color;
       this.context.lineWidth = strokes.width;
@@ -276,7 +317,7 @@ export default /*#__PURE__*/defineComponent({
         this.context.ellipse(strokes.coordinates[0].x, strokes.coordinates[0].y, strokes.coordinates[1].x, strokes.coordinates[1].y, 0, 0, Math.PI * 2);
       } else {
         this.context.moveTo(strokes.from.x, strokes.from.y);
-        strokes.coordinates.forEach(stroke => {
+        strokes.coordinates.forEach((stroke: { x: number, y: number}) => {
           this.context.lineTo(stroke.x, stroke.y);
         });
         if (closingPath) {
@@ -293,7 +334,7 @@ export default /*#__PURE__*/defineComponent({
       if (this.drawing) {
         this.strokes.coordinates = this.guides.length > 0 ? this.guides : this.strokes.coordinates;
         this.images.push(this.strokes);
-        this.redraw();
+        this.redraw(true);
         this.drawing = false;
         this.trash = [];
       }
@@ -310,7 +351,7 @@ export default /*#__PURE__*/defineComponent({
         };
         this.guides = [];
         this.trash = [];
-        this.redraw();
+        this.redraw(true);
       }
     },
     undo() {
@@ -318,7 +359,7 @@ export default /*#__PURE__*/defineComponent({
         let strokes = this.images.pop();
         if (strokes) {
           this.trash.push(strokes);
-          this.redraw();
+          this.redraw(true);
         }
       }
     },
@@ -327,7 +368,7 @@ export default /*#__PURE__*/defineComponent({
         let strokes = this.trash.pop();
         if (strokes) {
           this.images.push(strokes);
-          this.redraw();
+          this.redraw(true);
         }
       }
     },
@@ -335,8 +376,11 @@ export default /*#__PURE__*/defineComponent({
       output = typeof output !== 'undefined' ? output : true;
       await this.setBackground()
       .then(() => {
-        this.images.forEach(strokes => {
-          this.drawShape(strokes, this.type = 'eraser' || this.type === 'dash' ? false : true);
+        this.drawAdditionalImages()
+      })
+      .then(() => {
+        this.images.forEach((strokes: any) => {
+          this.drawShape(strokes, strokes.type === 'eraser' || strokes.type === 'dash' ? false : true);
         });
       })
       .then(() => {
@@ -345,7 +389,7 @@ export default /*#__PURE__*/defineComponent({
         }
       });
     },
-    wrapText(context, text, x, y, maxWidth, lineHeight) {
+    wrapText(context: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth : number, lineHeight: number) {
       const newLineRegex = /(\r\n|\n\r|\n|\r)+/g
       const whitespaceRegex = /\s+/g
       var lines = text.split(newLineRegex).filter(word => word.length > 0)
@@ -358,7 +402,7 @@ export default /*#__PURE__*/defineComponent({
           var metrics = context.measureText(testLine);
           var testWidth = metrics.width;
           if (testWidth > maxWidth && n > 0) {
-            if((this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') )
+            if(this.watermark && (this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') )
             {
               context.strokeText(line, x, y);
             }
@@ -372,7 +416,7 @@ export default /*#__PURE__*/defineComponent({
             line = testLine;
           }
         }
-        if((this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') )
+        if(this.watermark && (this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') )
         {
           context.strokeText(line, x, y);
         }
@@ -385,73 +429,81 @@ export default /*#__PURE__*/defineComponent({
     save() {
       if (this.watermark) {
         let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#'+this.canvasId);
-        let temp: HTMLCanvasElement = <HTMLCanvasElement>document.createElement('canvas');
-        let ctx = temp.getContext('2d');
-        temp.width = this.width;
-        temp.height = this.height;
-        ctx.drawImage(canvas, 0, 0, this.width, this.height);
-
-        if (this.watermark.type === 'Image') {
-          let imageWidth = this.watermark.imageStyle ? (this.watermark.imageStyle.width ? this.watermark.imageStyle.width : this.width) : this.width;
-          let imageHeight = this.watermark.imageStyle ? (this.watermark.imageStyle.height ? this.watermark.imageStyle.height : this.height) : this.height;
-
-          const image = new Image();
-          image.src = this.watermark.source;
-          image.onload = () => {
-            ctx.drawImage(image, this.watermark.x, this.watermark.y, imageWidth, imageHeight);
-            this.$emit('update:image', temp.toDataURL('image/' + this.saveAs, 1));
-            return(temp.toDataURL('image/' + this.saveAs, 1));
-          }
-        } else if (this.watermark.type === 'Text') {
-          let font = this.watermark.fontStyle ? (this.watermark.fontStyle.font ? this.watermark.fontStyle.font : '20px serif') : '20px serif';
-          let align = this.watermark.fontStyle ? (this.watermark.fontStyle.textAlign ? this.watermark.fontStyle.textAlign : 'start') : 'start';
-          let baseline = this.watermark.fontStyle ? (this.watermark.fontStyle.textBaseline ? this.watermark.fontStyle.textBaseline : 'alphabetic') : 'alphabetic';
-          let color = this.watermark.fontStyle ? (this.watermark.fontStyle.color ? this.watermark.fontStyle.color : '#000000') : '#000000';
+        let temp = document.createElement('canvas');
+        let ctx: CanvasRenderingContext2D | null = temp.getContext('2d')
+        
+        if (ctx) {
+          temp.width = Number(this.width);
+          temp.height = Number(this.height);
+          ctx.drawImage(canvas, 0, 0, Number(this.width), Number(this.height));
           
-          ctx.font = font;
-          ctx.textAlign = align;
-          ctx.textBaseline = baseline;
-
-          if (this.watermark.fontStyle && this.watermark.fontStyle.rotate) {
-            let centerX, centerY;
-            if (this.watermark.fontStyle && this.watermark.fontStyle.width) {
-              centerX = this.watermark.x + Math.floor(this.watermark.fontStyle.width / 2);
-            } else {
-              centerX = this.watermark.x;
-            }
-            if (this.watermark.fontStyle && this.watermark.fontStyle.lineHeight) {
-              centerY = this.watermark.y + Math.floor(this.watermark.fontStyle.lineHeight / 2);
-            } else {
-              centerY = this.watermark.y;
-            }
-            
-            ctx.translate(centerX, centerY);
-            ctx.rotate(this.watermark.fontStyle.rotate * Math.PI / 180);
-            ctx.translate(centerX * -1, centerY * -1);
-          }
-
-          if (this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') {
-            ctx.strokeStyle = this.watermark.fontStyle.color;
-            if (this.watermark.fontStyle && this.watermark.fontStyle.width) {
-              this.wrapText(ctx, this.watermark.source,  this.watermark.x,  this.watermark.y, this.watermark.fontStyle.width, this.watermark.fontStyle.lineHeight);
-            } else {
-              ctx.strokeText(this.watermark.source, this.watermark.x, this.watermark.y);
-            }
-          } else {
-            ctx.fillStyle = color;
-            if (this.watermark.fontStyle && this.watermark.fontStyle.width) {
-              this.wrapText(ctx, this.watermark.source,  this.watermark.x,  this.watermark.y, this.watermark.fontStyle.width, this.watermark.fontStyle.lineHeight);
-            } else {
-              ctx.fillText(this.watermark.source, this.watermark.x, this.watermark.y);
-            }
-          }
-          this.$emit('update:image', temp.toDataURL('image/' + this.saveAs, 1));
-          return(temp.toDataURL('image/' + this.saveAs, 1));
+          this.drawWatermark(temp, ctx, <WatermarkData>this.watermark)
         }
       } else {
         let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#'+this.canvasId);
         this.$emit('update:image', canvas.toDataURL('image/' + this.saveAs, 1));
         return canvas.toDataURL('image/' + this.saveAs, 1);
+      }
+    },
+    drawWatermark(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, watermark: WatermarkData) {
+      if (watermark.type === 'Image') {
+        let imageWidth = watermark.imageStyle ? (watermark.imageStyle.width ? watermark.imageStyle.width : this.width) : this.width;
+        let imageHeight = watermark.imageStyle ? (watermark.imageStyle.height ? watermark.imageStyle.height : this.height) : this.height;
+
+        const image = new Image();
+        image.src = watermark.source;
+        image.onload = () => {
+          if (watermark && ctx) {
+            ctx.drawImage(image, watermark.x, watermark.y, Number(imageWidth), Number(imageHeight));
+          }
+          this.$emit('update:image', canvas.toDataURL('image/' + this.saveAs, 1));
+          return(canvas.toDataURL('image/' + this.saveAs, 1));
+        }
+      } else if (watermark.type === 'Text') {
+        let font = watermark.fontStyle ? (watermark.fontStyle.font ? watermark.fontStyle.font : '20px serif') : '20px serif';
+        let align = watermark.fontStyle ? (watermark.fontStyle.textAlign ? watermark.fontStyle.textAlign : 'start') : 'start';
+        let baseline = watermark.fontStyle ? (watermark.fontStyle.textBaseline ? watermark.fontStyle.textBaseline : 'alphabetic') : 'alphabetic';
+        let color = watermark.fontStyle ? (watermark.fontStyle.color ? watermark.fontStyle.color : '#000000') : '#000000';
+        
+        ctx.font = font;
+        ctx.textAlign = align as CanvasTextAlign;
+        ctx.textBaseline = baseline as CanvasTextBaseline;
+
+        if (watermark.fontStyle && watermark.fontStyle.rotate) {
+          let centerX, centerY;
+          if (watermark.fontStyle && watermark.fontStyle.width) {
+            centerX = watermark.x + Math.floor(watermark.fontStyle.width / 2);
+          } else {
+            centerX = watermark.x;
+          }
+          if (watermark.fontStyle && watermark.fontStyle.lineHeight) {
+            centerY = watermark.y + Math.floor(watermark.fontStyle.lineHeight / 2);
+          } else {
+            centerY = watermark.y;
+          }
+          
+          ctx.translate(centerX, centerY);
+          ctx.rotate(watermark.fontStyle.rotate * Math.PI / 180);
+          ctx.translate(centerX * -1, centerY * -1);
+        }
+
+        if (watermark.fontStyle && watermark.fontStyle.drawType && watermark.fontStyle.drawType === 'stroke') {
+          ctx.strokeStyle = watermark.fontStyle.color;
+          if (watermark.fontStyle && watermark.fontStyle.width) {
+            this.wrapText(ctx, watermark.source,  watermark.x,  watermark.y, watermark.fontStyle.width, watermark.fontStyle.lineHeight);
+          } else {
+            ctx.strokeText(watermark.source, watermark.x, watermark.y);
+          }
+        } else {
+          ctx.fillStyle = color;
+          if (watermark.fontStyle && watermark.fontStyle.width) {
+            this.wrapText(ctx, watermark.source,  watermark.x,  watermark.y, watermark.fontStyle.width, watermark.fontStyle.lineHeight);
+          } else {
+            ctx.fillText(watermark.source, watermark.x, watermark.y);
+          }
+        }
+        this.$emit('update:image', canvas.toDataURL('image/' + this.saveAs, 1));
+        return(canvas.toDataURL('image/' + this.saveAs, 1));
       }
     },
     isEmpty() {
@@ -471,24 +523,25 @@ export default /*#__PURE__*/defineComponent({
         },
         style: {
           'touchAction': 'none',
+          // @ts-ignore
           ...this.styles
         },
         class: this.classes,
         on: {
-          mousedown: event => this.startDraw(event),
-          mousemove: event => this.draw(event),
-          mouseup: event => this.stopDraw(event),
-          mouseleave: event => this.stopDraw(event),
-          touchstart: event => this.startDraw(event),
-          touchmove: event => this.draw(event),
-          touchend: event => this.stopDraw(event),
-          touchleave: event => this.stopDraw(event),
-          touchcancel: event => this.stopDraw(event),
-          pointerdown: event => this.startDraw(event),
-		      pointermove: event => this.draw(event),
-		      pointerup: event => this.stopDraw(event),
-          pointerleave: event => this.stopDraw(event),
-          pointercancel: event => this.stopDraw(event),
+          mousedown: (event: Event) => this.startDraw(event),
+          mousemove: (event: Event) => this.draw(event),
+          mouseup: () => this.stopDraw(),
+          mouseleave: () => this.stopDraw(),
+          touchstart: (event: Event) => this.startDraw(event),
+          touchmove: (event: Event) => this.draw(event),
+          touchend: () => this.stopDraw(),
+          touchleave: () => this.stopDraw(),
+          touchcancel: () => this.stopDraw(),
+          pointerdown: (event: Event) => this.startDraw(event),
+		      pointermove: (event: Event) => this.draw(event),
+		      pointerup: () => this.stopDraw(),
+          pointerleave: () => this.stopDraw(),
+          pointercancel: () => this.stopDraw(),
         },
         ...this.$props
       });
@@ -499,23 +552,24 @@ export default /*#__PURE__*/defineComponent({
       width: this.width,
       style: {
         'touchAction': 'none',
+        // @ts-ignore
         ...this.styles
       },
       class: this.classes,
-      onMousedown: $event => this.startDraw($event),
-      onMousemove: $event => this.draw($event),
-      onMouseup: $event => this.stopDraw($event),
-      onMouseleave: $event => this.stopDraw($event),
-      onTouchstart: $event => this.startDraw($event),
-      onTouchmove: $event => this.draw($event),
-      onTouchend: $event => this.stopDraw($event),
-      onTouchleave: $event => this.stopDraw($event),
-      onTouchcancel: $event => this.stopDraw($event),
-      onPointerdown: $event => this.startDraw($event),
-      onPointermove: $event => this.draw($event),
-      onPointerup: $event => this.stopDraw($event),
-      onPointerleave: $event => this.stopDraw($event),
-      onPointercancel: $event => this.stopDraw($event)
+      onMousedown: ($event: Event) => this.startDraw($event),
+      onMousemove: ($event: Event) => this.draw($event),
+      onMouseup: () => this.stopDraw(),
+      onMouseleave: () => this.stopDraw(),
+      onTouchstart: ($event: Event) => this.startDraw($event),
+      onTouchmove: ($event: Event) => this.draw($event),
+      onTouchend: () => this.stopDraw(),
+      onTouchleave: () => this.stopDraw(),
+      onTouchcancel: () => this.stopDraw(),
+      onPointerdown: ($event: Event) => this.startDraw($event),
+      onPointermove: ($event: Event) => this.draw($event),
+      onPointerup: () => this.stopDraw(),
+      onPointerleave: () => this.stopDraw(),
+      onPointercancel: () => this.stopDraw()
     });
   }
 });

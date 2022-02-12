@@ -58,7 +58,8 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
       default: () => null
     },
     watermark: {
-      type: Object
+      type: Object,
+      default: () => null
     },
     saveAs: {
       type: String,
@@ -72,6 +73,10 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
       default: () => 'VueDrawingCanvas'
     },
     initialImage: {
+      type: Array,
+      default: () => []
+    },
+    additionalImages: {
       type: Array,
       default: () => []
     }
@@ -103,6 +108,7 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
     this.setContext();
     this.$nextTick(() => {
       this.drawInitialImage();
+      this.drawAdditionalImages();
     });
   },
 
@@ -119,9 +125,19 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
     },
 
     drawInitialImage() {
-      if (this.initialImage.length > 0) {
+      if (this.initialImage && this.initialImage.length > 0) {
+        // @ts-ignore
         this.images = [].concat(this.images, this.initialImage);
-        this.redraw();
+        this.redraw(true);
+      }
+    },
+
+    drawAdditionalImages() {
+      if (this.additionalImages && this.additionalImages.length > 0) {
+        let canvas = document.querySelector('#' + this.canvasId);
+        this.additionalImages.forEach(watermarkObject => {
+          this.drawWatermark(canvas, this.context, watermarkObject);
+        });
       }
     },
 
@@ -331,7 +347,7 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
       if (this.drawing) {
         this.strokes.coordinates = this.guides.length > 0 ? this.guides : this.strokes.coordinates;
         this.images.push(this.strokes);
-        this.redraw();
+        this.redraw(true);
         this.drawing = false;
         this.trash = [];
       }
@@ -349,7 +365,7 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
         };
         this.guides = [];
         this.trash = [];
-        this.redraw();
+        this.redraw(true);
       }
     },
 
@@ -359,7 +375,7 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
 
         if (strokes) {
           this.trash.push(strokes);
-          this.redraw();
+          this.redraw(true);
         }
       }
     },
@@ -370,7 +386,7 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
 
         if (strokes) {
           this.images.push(strokes);
-          this.redraw();
+          this.redraw(true);
         }
       }
     },
@@ -378,8 +394,10 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
     async redraw(output) {
       output = typeof output !== 'undefined' ? output : true;
       await this.setBackground().then(() => {
+        this.drawAdditionalImages();
+      }).then(() => {
         this.images.forEach(strokes => {
-          this.drawShape(strokes, this.type = false );
+          this.drawShape(strokes, strokes.type === 'eraser' || strokes.type === 'dash' ? false : true);
         });
       }).then(() => {
         if (output) {
@@ -403,7 +421,7 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
           var testWidth = metrics.width;
 
           if (testWidth > maxWidth && n > 0) {
-            if (this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') {
+            if (this.watermark && this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') {
               context.strokeText(line, x, y);
             } else {
               context.fillText(line, x, y);
@@ -416,7 +434,7 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
           }
         }
 
-        if (this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') {
+        if (this.watermark && this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') {
           context.strokeText(line, x, y);
         } else {
           context.fillText(line, x, y);
@@ -431,73 +449,82 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
         let canvas = document.querySelector('#' + this.canvasId);
         let temp = document.createElement('canvas');
         let ctx = temp.getContext('2d');
-        temp.width = this.width;
-        temp.height = this.height;
-        ctx.drawImage(canvas, 0, 0, this.width, this.height);
 
-        if (this.watermark.type === 'Image') {
-          let imageWidth = this.watermark.imageStyle ? this.watermark.imageStyle.width ? this.watermark.imageStyle.width : this.width : this.width;
-          let imageHeight = this.watermark.imageStyle ? this.watermark.imageStyle.height ? this.watermark.imageStyle.height : this.height : this.height;
-          const image = new Image();
-          image.src = this.watermark.source;
-
-          image.onload = () => {
-            ctx.drawImage(image, this.watermark.x, this.watermark.y, imageWidth, imageHeight);
-            this.$emit('update:image', temp.toDataURL('image/' + this.saveAs, 1));
-            return temp.toDataURL('image/' + this.saveAs, 1);
-          };
-        } else if (this.watermark.type === 'Text') {
-          let font = this.watermark.fontStyle ? this.watermark.fontStyle.font ? this.watermark.fontStyle.font : '20px serif' : '20px serif';
-          let align = this.watermark.fontStyle ? this.watermark.fontStyle.textAlign ? this.watermark.fontStyle.textAlign : 'start' : 'start';
-          let baseline = this.watermark.fontStyle ? this.watermark.fontStyle.textBaseline ? this.watermark.fontStyle.textBaseline : 'alphabetic' : 'alphabetic';
-          let color = this.watermark.fontStyle ? this.watermark.fontStyle.color ? this.watermark.fontStyle.color : '#000000' : '#000000';
-          ctx.font = font;
-          ctx.textAlign = align;
-          ctx.textBaseline = baseline;
-
-          if (this.watermark.fontStyle && this.watermark.fontStyle.rotate) {
-            let centerX, centerY;
-
-            if (this.watermark.fontStyle && this.watermark.fontStyle.width) {
-              centerX = this.watermark.x + Math.floor(this.watermark.fontStyle.width / 2);
-            } else {
-              centerX = this.watermark.x;
-            }
-
-            if (this.watermark.fontStyle && this.watermark.fontStyle.lineHeight) {
-              centerY = this.watermark.y + Math.floor(this.watermark.fontStyle.lineHeight / 2);
-            } else {
-              centerY = this.watermark.y;
-            }
-
-            ctx.translate(centerX, centerY);
-            ctx.rotate(this.watermark.fontStyle.rotate * Math.PI / 180);
-            ctx.translate(centerX * -1, centerY * -1);
-          }
-
-          if (this.watermark.fontStyle && this.watermark.fontStyle.drawType && this.watermark.fontStyle.drawType === 'stroke') {
-            ctx.strokeStyle = this.watermark.fontStyle.color;
-
-            if (this.watermark.fontStyle && this.watermark.fontStyle.width) {
-              this.wrapText(ctx, this.watermark.source, this.watermark.x, this.watermark.y, this.watermark.fontStyle.width, this.watermark.fontStyle.lineHeight);
-            } else {
-              ctx.strokeText(this.watermark.source, this.watermark.x, this.watermark.y);
-            }
-          } else {
-            ctx.fillStyle = color;
-
-            if (this.watermark.fontStyle && this.watermark.fontStyle.width) {
-              this.wrapText(ctx, this.watermark.source, this.watermark.x, this.watermark.y, this.watermark.fontStyle.width, this.watermark.fontStyle.lineHeight);
-            } else {
-              ctx.fillText(this.watermark.source, this.watermark.x, this.watermark.y);
-            }
-          }
-
-          this.$emit('update:image', temp.toDataURL('image/' + this.saveAs, 1));
-          return temp.toDataURL('image/' + this.saveAs, 1);
+        if (ctx) {
+          temp.width = Number(this.width);
+          temp.height = Number(this.height);
+          ctx.drawImage(canvas, 0, 0, Number(this.width), Number(this.height));
+          this.drawWatermark(temp, ctx, this.watermark);
         }
       } else {
         let canvas = document.querySelector('#' + this.canvasId);
+        this.$emit('update:image', canvas.toDataURL('image/' + this.saveAs, 1));
+        return canvas.toDataURL('image/' + this.saveAs, 1);
+      }
+    },
+
+    drawWatermark(canvas, ctx, watermark) {
+      if (watermark.type === 'Image') {
+        let imageWidth = watermark.imageStyle ? watermark.imageStyle.width ? watermark.imageStyle.width : this.width : this.width;
+        let imageHeight = watermark.imageStyle ? watermark.imageStyle.height ? watermark.imageStyle.height : this.height : this.height;
+        const image = new Image();
+        image.src = watermark.source;
+
+        image.onload = () => {
+          if (watermark && ctx) {
+            ctx.drawImage(image, watermark.x, watermark.y, Number(imageWidth), Number(imageHeight));
+          }
+
+          this.$emit('update:image', canvas.toDataURL('image/' + this.saveAs, 1));
+          return canvas.toDataURL('image/' + this.saveAs, 1);
+        };
+      } else if (watermark.type === 'Text') {
+        let font = watermark.fontStyle ? watermark.fontStyle.font ? watermark.fontStyle.font : '20px serif' : '20px serif';
+        let align = watermark.fontStyle ? watermark.fontStyle.textAlign ? watermark.fontStyle.textAlign : 'start' : 'start';
+        let baseline = watermark.fontStyle ? watermark.fontStyle.textBaseline ? watermark.fontStyle.textBaseline : 'alphabetic' : 'alphabetic';
+        let color = watermark.fontStyle ? watermark.fontStyle.color ? watermark.fontStyle.color : '#000000' : '#000000';
+        ctx.font = font;
+        ctx.textAlign = align;
+        ctx.textBaseline = baseline;
+
+        if (watermark.fontStyle && watermark.fontStyle.rotate) {
+          let centerX, centerY;
+
+          if (watermark.fontStyle && watermark.fontStyle.width) {
+            centerX = watermark.x + Math.floor(watermark.fontStyle.width / 2);
+          } else {
+            centerX = watermark.x;
+          }
+
+          if (watermark.fontStyle && watermark.fontStyle.lineHeight) {
+            centerY = watermark.y + Math.floor(watermark.fontStyle.lineHeight / 2);
+          } else {
+            centerY = watermark.y;
+          }
+
+          ctx.translate(centerX, centerY);
+          ctx.rotate(watermark.fontStyle.rotate * Math.PI / 180);
+          ctx.translate(centerX * -1, centerY * -1);
+        }
+
+        if (watermark.fontStyle && watermark.fontStyle.drawType && watermark.fontStyle.drawType === 'stroke') {
+          ctx.strokeStyle = watermark.fontStyle.color;
+
+          if (watermark.fontStyle && watermark.fontStyle.width) {
+            this.wrapText(ctx, watermark.source, watermark.x, watermark.y, watermark.fontStyle.width, watermark.fontStyle.lineHeight);
+          } else {
+            ctx.strokeText(watermark.source, watermark.x, watermark.y);
+          }
+        } else {
+          ctx.fillStyle = color;
+
+          if (watermark.fontStyle && watermark.fontStyle.width) {
+            this.wrapText(ctx, watermark.source, watermark.x, watermark.y, watermark.fontStyle.width, watermark.fontStyle.lineHeight);
+          } else {
+            ctx.fillText(watermark.source, watermark.x, watermark.y);
+          }
+        }
+
         this.$emit('update:image', canvas.toDataURL('image/' + this.saveAs, 1));
         return canvas.toDataURL('image/' + this.saveAs, 1);
       }
@@ -523,24 +550,25 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
         },
         style: {
           'touchAction': 'none',
+          // @ts-ignore
           ...this.styles
         },
         class: this.classes,
         on: {
           mousedown: event => this.startDraw(event),
           mousemove: event => this.draw(event),
-          mouseup: event => this.stopDraw(event),
-          mouseleave: event => this.stopDraw(event),
+          mouseup: () => this.stopDraw(),
+          mouseleave: () => this.stopDraw(),
           touchstart: event => this.startDraw(event),
           touchmove: event => this.draw(event),
-          touchend: event => this.stopDraw(event),
-          touchleave: event => this.stopDraw(event),
-          touchcancel: event => this.stopDraw(event),
+          touchend: () => this.stopDraw(),
+          touchleave: () => this.stopDraw(),
+          touchcancel: () => this.stopDraw(),
           pointerdown: event => this.startDraw(event),
           pointermove: event => this.draw(event),
-          pointerup: event => this.stopDraw(event),
-          pointerleave: event => this.stopDraw(event),
-          pointercancel: event => this.stopDraw(event)
+          pointerup: () => this.stopDraw(),
+          pointerleave: () => this.stopDraw(),
+          pointercancel: () => this.stopDraw()
         },
         ...this.$props
       });
@@ -552,23 +580,24 @@ var VueDrawingCanvas = /*#__PURE__*/defineComponent({
       width: this.width,
       style: {
         'touchAction': 'none',
+        // @ts-ignore
         ...this.styles
       },
       class: this.classes,
       onMousedown: $event => this.startDraw($event),
       onMousemove: $event => this.draw($event),
-      onMouseup: $event => this.stopDraw($event),
-      onMouseleave: $event => this.stopDraw($event),
+      onMouseup: () => this.stopDraw(),
+      onMouseleave: () => this.stopDraw(),
       onTouchstart: $event => this.startDraw($event),
       onTouchmove: $event => this.draw($event),
-      onTouchend: $event => this.stopDraw($event),
-      onTouchleave: $event => this.stopDraw($event),
-      onTouchcancel: $event => this.stopDraw($event),
+      onTouchend: () => this.stopDraw(),
+      onTouchleave: () => this.stopDraw(),
+      onTouchcancel: () => this.stopDraw(),
       onPointerdown: $event => this.startDraw($event),
       onPointermove: $event => this.draw($event),
-      onPointerup: $event => this.stopDraw($event),
-      onPointerleave: $event => this.stopDraw($event),
-      onPointercancel: $event => this.stopDraw($event)
+      onPointerup: () => this.stopDraw(),
+      onPointerleave: () => this.stopDraw(),
+      onPointercancel: () => this.stopDraw()
     });
   }
 

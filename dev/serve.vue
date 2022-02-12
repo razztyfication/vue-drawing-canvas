@@ -1,4 +1,5 @@
 <script lang="ts">
+// @ts-nocheck
 import { defineComponent } from 'vue';
 import VueDrawingCanvas from '@/entry';
 
@@ -9,7 +10,172 @@ export default defineComponent({
   },
   data() {
     return {
-      initialImage: [],
+      initialImage: [
+        {
+          "type": "dash",
+          "from": {
+            "x": 262,
+            "y": 154
+          },
+          "coordinates": [
+            {
+              "x": 263,
+              "y": 156
+            },
+            {
+              "x": 263,
+              "y": 156
+            },
+            {
+              "x": 280,
+              "y": 177
+            },
+            {
+              "x": 280,
+              "y": 177
+            },
+            {
+              "x": 296,
+              "y": 195
+            },
+            {
+              "x": 296,
+              "y": 195
+            },
+            {
+              "x": 305,
+              "y": 204
+            },
+            {
+              "x": 305,
+              "y": 204
+            },
+            {
+              "x": 314,
+              "y": 213
+            },
+            {
+              "x": 314,
+              "y": 213
+            },
+            {
+              "x": 320,
+              "y": 220
+            },
+            {
+              "x": 320,
+              "y": 220
+            },
+            {
+              "x": 327,
+              "y": 226
+            },
+            {
+              "x": 327,
+              "y": 226
+            },
+            {
+              "x": 333,
+              "y": 233
+            },
+            {
+              "x": 333,
+              "y": 233
+            },
+            {
+              "x": 336,
+              "y": 236
+            },
+            {
+              "x": 336,
+              "y": 236
+            },
+            {
+              "x": 341,
+              "y": 241
+            },
+            {
+              "x": 341,
+              "y": 241
+            },
+            {
+              "x": 344,
+              "y": 245
+            },
+            {
+              "x": 344,
+              "y": 245
+            },
+            {
+              "x": 346,
+              "y": 248
+            },
+            {
+              "x": 346,
+              "y": 248
+            },
+            {
+              "x": 349,
+              "y": 250
+            },
+            {
+              "x": 349,
+              "y": 250
+            },
+            {
+              "x": 350,
+              "y": 253
+            },
+            {
+              "x": 350,
+              "y": 253
+            },
+            {
+              "x": 352,
+              "y": 254
+            },
+            {
+              "x": 352,
+              "y": 254
+            },
+            {
+              "x": 353,
+              "y": 256
+            },
+            {
+              "x": 353,
+              "y": 256
+            },
+            {
+              "x": 355,
+              "y": 258
+            },
+            {
+              "x": 355,
+              "y": 258
+            },
+            {
+              "x": 356,
+              "y": 259
+            },
+            {
+              "x": 356,
+              "y": 259
+            },
+            {
+              "x": 358,
+              "y": 261
+            },
+            {
+              "x": 358,
+              "y": 261
+            }
+          ],
+          "color": "#000000",
+          "width": 5,
+          "fill": false
+        }
+      ],
       x: 0,
       y: 0,
       image: '',
@@ -21,27 +187,29 @@ export default defineComponent({
       strokeType: 'dash',
       backgroundColor: '#FFFFFF',
       backgroundImage: null,
-      watermark: null
-      // watermark: {
-      //   type: "Text", // "Text" or "Image"
-      //   source: "Watermark", // either Text or Image URL
-      //   x: 200,
-      //   y: 180,
-      //   imageStyle: {
-      //     width: 600,
-      //     height: 400
-      //   },
-      //   fontStyle: {
-      //     width: 200,
-      //     lineHeight: 48,
-      //     color: '#FF0000',
-      //     font: 'bold 48px roboto',
-      //     drawType: 'fill', // "fill" or "stroke"
-      //     textAlign: 'left',
-      //     textBaseline: 'top',
-      //     rotate: 0
-      //   }
-      // }
+      watermark: null,
+      additionalImages: [
+        {
+          type: "Text", // "Text" or "Image"
+          source: "Watermark", // either Text or Image URL
+          x: 200,
+          y: 180,
+          imageStyle: {
+            width: 600,
+            height: 400
+          },
+          fontStyle: {
+            width: 200,
+            lineHeight: 48,
+            color: '#FF0000',
+            font: 'bold 48px roboto',
+            drawType: 'fill', // "fill" or "stroke"
+            textAlign: 'left',
+            textBaseline: 'top',
+            rotate: 0
+          }
+        }
+      ]
     }
   },
   mounted() {
@@ -50,16 +218,16 @@ export default defineComponent({
     }
   },
   methods: {
-    async setImage(event) {
+    async setImage(event: Event) {
       let URL = window.URL;
-      this.backgroundImage = URL.createObjectURL(event.target.files[0]);
+      this.backgroundImage = URL.createObjectURL((<HTMLInputElement>event.target).files[0]);
       await this.$refs.VueCanvasDrawing.redraw();
     },
-    async setWatermarkImage(event) {
+    async setWatermarkImage(event: Event) {
       let URL = window.URL;
       this.watermark = {
         type: "Image",
-        source: URL.createObjectURL(event.target.files[0]),
+        source: URL.createObjectURL((<HTMLInputElement>event.target).files[0]),
         x: 0,
         y: 0,
         imageStyle: {
@@ -69,7 +237,7 @@ export default defineComponent({
       }
       await this.$refs.VueCanvasDrawing.redraw();
     },
-    getCoordinate(event) {
+    getCoordinate(event: Event) {
       let coordinates = this.$refs.VueCanvasDrawing.getCoordinates(event);
       this.x = coordinates.x;
       this.y = coordinates.y;
@@ -109,6 +277,7 @@ export default defineComponent({
           }"
           :lock="disabled"
           @mousemove="getCoordinate($event)"
+          :additional-images="additionalImages"
         />
         <p>
           x-axis: <strong>{{ x }}</strong>, y-axis: <strong>{{ y }}</strong>

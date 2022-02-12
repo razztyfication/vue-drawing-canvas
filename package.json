@@ -1,6 +1,6 @@
 {
   "name": "vue-drawing-canvas",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "author": {
     "name": "Toni Oktoro",
     "email": "tonioktoro@gmail.com"
@@ -12,11 +12,9 @@
   "homepage": "https://github.com/razztyfication/vue-drawing-canvas",
   "private": false,
   "description": "VueJS Component for drawing on canvas.",
-  "main": "dist/vue-drawing-canvas.ssr.js",
-  "browser": "dist/vue-drawing-canvas.esm.js",
+  "main": "dist/vue-drawing-canvas.esm.js",
   "module": "dist/vue-drawing-canvas.esm.js",
-  "unpkg": "dist/vue-drawing-canvas.min.js",
-  "types": "dist/types/src/entry.esm.d.ts",
+  "types": "dist/types/src/VueDrawingCanvas.d.ts",
   "files": [
     "dist/*"
   ],
@@ -24,10 +22,7 @@
   "scripts": {
     "serve": "vue-cli-service serve dev/serve.ts",
     "prebuild": "rimraf ./dist",
-    "build": "cross-env NODE_ENV=production rollup --config build/rollup.config.js",
-    "build:ssr": "cross-env NODE_ENV=production rollup --config build/rollup.config.js --format cjs",
-    "build:es": "cross-env NODE_ENV=production rollup --config build/rollup.config.js --format es",
-    "build:unpkg": "cross-env NODE_ENV=production rollup --config build/rollup.config.js --format iife",
+    "build": "cross-env NODE_ENV=production rollup --config build/rollup.config.js --format es",
     "postbuild": "rimraf ./dist/types/dev ./dist/types/src/entry.d.ts"
   },
   "dependencies": {

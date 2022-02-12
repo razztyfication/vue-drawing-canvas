@@ -20,6 +20,9 @@ Support for both Vue 3 and Vue 2 + [Composition API](https://github.com/vuejs/co
 
 [![vue-drawing-canvas](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/vue-drawing-canvas-p4slb)
 
+> Note:
+> If you're using nuxt.js and receive error `Object(...) is not a function` please refer to this [issue](https://github.com/razztyfication/vue-drawing-canvas/issues/13)
+
 <br><br>
 
 <h1>Table of Contents</h1>
@@ -89,6 +92,7 @@ export default {
 | backgroundColor | String                | `"#FFFFFF"`        | Set background color on your canvas                                                                                              |
 | backgroundImage | String                |                    | Set background image on your canvas<br><br>***Be carefull for performance issue when using this props !!***                      |
 | initialImage    | Array                 | `[]`               | Draw strokes and shapes from canvas you've worked before. [Demo](https://codesandbox.io/s/vue-drawing-canvas-107-rc1-dcoiy)      |
+| additionalImages | Array                | `[]`               | Accept Array of [watermark](#watermark-object) Object to draw either text or insert multiple image on canvas<br><br>***Be carefull for performance issue when using this props !!*** |
 | classes         | Array, String, Object |                    | Specifies your own classes to canvas                                                                                             |
 | styles          | Array, String, Object |                    | Specifies your own styles to canvas                                                                                              |
 | watermark       | Object                |                    | Put watermark text/image on your image output<br><br>(see details in the next section below)                                     |
