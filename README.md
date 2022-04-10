@@ -98,7 +98,6 @@ Then add it to your component files
 | styles           | Array, String, Object |                    | Specifies your own styles to canvas                                                                                                                                                  |
 | watermark        |        Object         |                    | Put watermark text/image on your image output<br><br>(see details in the next section below)                                                                                         |
 | saveAs           |        String         |      `"png"`       | Specifies output type. This props accept either `"png"` or `"jpeg"`                                                                                                                  |
-| scale            |        Number         |         1          | transforms the canvas via the setTransform(...) method. Parent Element has to handle the real dimensions                                                                             |
 
 <br>
 
@@ -213,13 +212,6 @@ Then add it to your component files
 ```
 
 <br><br>
-
-### Scale
-
-Improves the resolution of the canvas. For more detailed drawings.
-How to use: Set the canvas width and height props to 2x the desired dimensions (1000x1000 px), set :scale=2 and finally set the dimensions of the parent element of the canvas to the originally desired dimensions (500x500 px).
-
-<br>
 
 ## Methods
 

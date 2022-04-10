@@ -17,160 +17,7 @@ export default defineComponent({
             "x": 262,
             "y": 154
           },
-          "coordinates": [
-            {
-              "x": 263,
-              "y": 156
-            },
-            {
-              "x": 263,
-              "y": 156
-            },
-            {
-              "x": 280,
-              "y": 177
-            },
-            {
-              "x": 280,
-              "y": 177
-            },
-            {
-              "x": 296,
-              "y": 195
-            },
-            {
-              "x": 296,
-              "y": 195
-            },
-            {
-              "x": 305,
-              "y": 204
-            },
-            {
-              "x": 305,
-              "y": 204
-            },
-            {
-              "x": 314,
-              "y": 213
-            },
-            {
-              "x": 314,
-              "y": 213
-            },
-            {
-              "x": 320,
-              "y": 220
-            },
-            {
-              "x": 320,
-              "y": 220
-            },
-            {
-              "x": 327,
-              "y": 226
-            },
-            {
-              "x": 327,
-              "y": 226
-            },
-            {
-              "x": 333,
-              "y": 233
-            },
-            {
-              "x": 333,
-              "y": 233
-            },
-            {
-              "x": 336,
-              "y": 236
-            },
-            {
-              "x": 336,
-              "y": 236
-            },
-            {
-              "x": 341,
-              "y": 241
-            },
-            {
-              "x": 341,
-              "y": 241
-            },
-            {
-              "x": 344,
-              "y": 245
-            },
-            {
-              "x": 344,
-              "y": 245
-            },
-            {
-              "x": 346,
-              "y": 248
-            },
-            {
-              "x": 346,
-              "y": 248
-            },
-            {
-              "x": 349,
-              "y": 250
-            },
-            {
-              "x": 349,
-              "y": 250
-            },
-            {
-              "x": 350,
-              "y": 253
-            },
-            {
-              "x": 350,
-              "y": 253
-            },
-            {
-              "x": 352,
-              "y": 254
-            },
-            {
-              "x": 352,
-              "y": 254
-            },
-            {
-              "x": 353,
-              "y": 256
-            },
-            {
-              "x": 353,
-              "y": 256
-            },
-            {
-              "x": 355,
-              "y": 258
-            },
-            {
-              "x": 355,
-              "y": 258
-            },
-            {
-              "x": 356,
-              "y": 259
-            },
-            {
-              "x": 356,
-              "y": 259
-            },
-            {
-              "x": 358,
-              "y": 261
-            },
-            {
-              "x": 358,
-              "y": 261
-            }
-          ],
+          "coordinates": [],
           "color": "#000000",
           "width": 5,
           "fill": false
@@ -188,28 +35,7 @@ export default defineComponent({
       backgroundColor: '#FFFFFF',
       backgroundImage: null,
       watermark: null,
-      additionalImages: [
-        {
-          type: "Text", // "Text" or "Image"
-          source: "Watermark", // either Text or Image URL
-          x: 200,
-          y: 180,
-          imageStyle: {
-            width: 600,
-            height: 400
-          },
-          fontStyle: {
-            width: 200,
-            lineHeight: 48,
-            color: '#FF0000',
-            font: 'bold 48px roboto',
-            drawType: 'fill', // "fill" or "stroke"
-            textAlign: 'left',
-            textBaseline: 'top',
-            rotate: 0
-          }
-        }
-      ]
+      additionalImages: []
     }
   },
   mounted() {
@@ -262,6 +88,9 @@ export default defineComponent({
         <vue-drawing-canvas
           ref="VueCanvasDrawing"
           v-model:image="image"
+          :width="1000"
+          :height="1000"
+          :scale="2"
           :stroke-type="strokeType"
           :fill-shape="fillShape"
           :eraser="eraser"
@@ -408,7 +237,7 @@ export default defineComponent({
       
       <div class="output">
         <p>Output:</p>
-        <img :src="image" style="border: solid 1px #000000">
+        <img :src="image" style="border: solid 1px #000000;width: 500px;height: 500px;">
       </div>
     </div>
   </div>
