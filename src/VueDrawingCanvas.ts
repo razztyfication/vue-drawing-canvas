@@ -115,6 +115,10 @@ export default /*#__PURE__*/defineComponent({
     additionalImages: {
       type: Array,
       default: (): any => []
+    },
+    scale:{
+      type: Number,
+      default: () => 1
     }
   },
   data(): DataInit {
@@ -138,6 +142,7 @@ export default /*#__PURE__*/defineComponent({
   mounted() {
     this.setContext();
     this.$nextTick(() => {
+      this.setScale()
       this.drawInitialImage()
       this.drawAdditionalImages()
     })
@@ -148,6 +153,15 @@ export default /*#__PURE__*/defineComponent({
     }
   },
   methods: {
+
+    setScale(){
+      if(this.scale==1) return
+      let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#'+this.canvasId);
+      let ctx = canvas.getContext("2d");
+      if(!ctx) return
+      ctx.setTransform(this.scale, 0, 0, this.scale, 0, 0);
+    },
+
     async setContext() {
       let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#'+this.canvasId);
       this.context = this.context ? this.context : canvas.getContext('2d');
