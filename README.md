@@ -216,7 +216,8 @@ Then add it to your component files
 
 ### Scale
 
-Improves the resolution of the canvas. For more detailed drawings. Example: Set the canvas width and height props to 2x the desired dimensions, set :scale=2 and finally set the dimensions of the parent element of the canvas to the originally desired dimensions.
+Improves the resolution of the canvas. For more detailed drawings.
+How to use: Set the canvas width and height props to 2x the desired dimensions (1000x1000 px), set :scale=2 and finally set the dimensions of the parent element of the canvas to the originally desired dimensions (500x500 px).
 
 <br>
 
