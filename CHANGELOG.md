@@ -1,4 +1,12 @@
-# [v1.0.9](https://github.com/razztyfication/vue-drawing-canvas)
+# [v1.0.10](https://github.com/razztyfication/vue-drawing-canvas)
+
+- Eraser no longer erase background image.
+- Added new prop **lineCap** and **lineJoin**
+- Added new value `"line"` on **strokeStyle** to draw straight line
+
+<br>
+
+# [v1.0.9](https://github.com/razztyfication/vue-drawing-canvas/tree/v1.0.9)
 
 - BUG FIX redraw function with wrong stroke type
 - BUG FIX typescript type declaration not compatible with `noImplicitAny`

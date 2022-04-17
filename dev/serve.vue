@@ -32,6 +32,8 @@ export default defineComponent({
       line: 5,
       color: '#000000',
       strokeType: 'dash',
+      lineCap: 'square',
+      lineJoin: 'miter',
       backgroundColor: '#FFFFFF',
       backgroundImage: null,
       watermark: null,
@@ -88,10 +90,11 @@ export default defineComponent({
         <vue-drawing-canvas
           ref="VueCanvasDrawing"
           v-model:image="image"
-          :width="1000"
-          :height="1000"
-          :scale="2"
+          :width="600"
+          :height="400"
           :stroke-type="strokeType"
+          :line-cap="lineCap"
+          :line-join="lineJoin"
           :fill-shape="fillShape"
           :eraser="eraser"
           :lineWidth="line"
@@ -100,7 +103,7 @@ export default defineComponent({
           :background-image="backgroundImage"
           :watermark="watermark"
           :initial-image="initialImage"
-          saveAs="jpeg"
+          saveAs="png"
           :styles="{
             'border': 'solid 1px #000'
           }"
@@ -171,6 +174,9 @@ export default defineComponent({
             <option value="dash">
               Dash
             </option>
+            <option value="line">
+              Straight Line
+            </option>
             <option value="circle">
               Circle
             </option>
@@ -182,6 +188,28 @@ export default defineComponent({
             </option>
             <option value="half_triangle">
               Half Triangle
+            </option>
+          </select>
+          <select v-model="lineCap">
+            <option value="round">
+              lineCap Round
+            </option>
+            <option value="square">
+              lineCap Square
+            </option>
+            <option value="butt">
+              lineCap butt
+            </option>
+          </select>
+          <select v-model="lineJoin">
+            <option value="round">
+              lineJoin Round
+            </option>
+            <option value="miter">
+              lineJoin miter
+            </option>
+            <option value="bevel">
+              lineJoin bevel
             </option>
           </select>
           <button type="button" @click.prevent="fillShape = !fillShape">
@@ -237,7 +265,7 @@ export default defineComponent({
       
       <div class="output">
         <p>Output:</p>
-        <img :src="image" style="border: solid 1px #000000;width: 500px;height: 500px;">
+        <img :src="image" style="border: solid 1px #000000;">
       </div>
     </div>
   </div>

@@ -43,7 +43,7 @@ export default /*#__PURE__*/defineComponent({
     strokeType: {
       type: String,
       validator: (value: string): boolean => {
-        return ['dash', 'square', 'circle', 'triangle', 'half_triangle'].indexOf(value) !== -1
+        return ['dash', 'line', 'square', 'circle', 'triangle', 'half_triangle'].indexOf(value) !== -1
       },
       default: () => 'dash'
     },
@@ -74,6 +74,20 @@ export default /*#__PURE__*/defineComponent({
     lineWidth: {
       type: Number,
       default: () => 5
+    },
+    lineCap: {
+      type: String,
+      validator: (value: string): boolean => {
+        return ['round', 'square', 'butt'].indexOf(value) !== -1
+      },
+      default: () => 'round'
+    },
+    lineJoin: {
+      type: String,
+      validator: (value: string): boolean => {
+        return ['miter', 'round', 'bevel'].indexOf(value) !== -1
+      },
+      default: () => 'miter'
     },
     lock: {
       type: Boolean,
@@ -115,10 +129,6 @@ export default /*#__PURE__*/defineComponent({
     additionalImages: {
       type: Array,
       default: (): any => []
-    },
-    scale:{
-      type: Number,
-      default: () => 1
     }
   },
   data(): DataInit {
@@ -142,7 +152,6 @@ export default /*#__PURE__*/defineComponent({
   mounted() {
     this.setContext();
     this.$nextTick(() => {
-      this.setScale()
       this.drawInitialImage()
       this.drawAdditionalImages()
     })
@@ -153,15 +162,6 @@ export default /*#__PURE__*/defineComponent({
     }
   },
   methods: {
-
-    setScale(){
-      if(this.scale==1) return
-      let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#'+this.canvasId);
-      let ctx = canvas.getContext("2d");
-      if(!ctx) return
-      ctx.setTransform(this.scale, 0, 0, this.scale, 0, 0);
-    },
-
     async setContext() {
       let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#'+this.canvasId);
       this.context = this.context ? this.context : canvas.getContext('2d');
@@ -184,12 +184,11 @@ export default /*#__PURE__*/defineComponent({
       }
     },
     clear() {
-      this.context.clearRect(0, 0, this.width, this.height);
+      this.context.clearRect(0, 0, Number(this.width), Number(this.height));
     },
     async setBackground() {
       this.clear();
       this.context.fillStyle = this.backgroundColor;
-      this.context.fillRect(0, 0, this.width, this.height);
       
       await this.$nextTick(async () => {
         await this.drawBackgroundImage()
@@ -206,13 +205,13 @@ export default /*#__PURE__*/defineComponent({
           const image = new Image();
           image.src = this.backgroundImage;
           image.onload = () => {
-            this.context.drawImage(image, 0, 0, this.width, this.height);
+            this.context.drawImage(image, 0, 0, Number(this.width), Number(this.height));
             this.loadedImage = image
             resolve();
           }
         })
       } else {
-        this.context.drawImage(this.loadedImage, 0, 0, this.width, this.height);
+        this.context.drawImage(this.loadedImage, 0, 0, Number(this.width), Number(this.height));
       }
     },    
     getCoordinates(event: Event) {
@@ -242,7 +241,9 @@ export default /*#__PURE__*/defineComponent({
           coordinates: [],
           color: this.eraser ? this.backgroundColor : this.color,
           width: this.lineWidth,
-          fill: this.eraser || this.strokeType === 'dash' ? false : this.fillShape
+          fill: this.eraser || this.strokeType === 'dash' || this.strokeType === 'line' ? false : this.fillShape,
+          lineCap: this.lineCap,
+          lineJoin: this.lineJoin
         };
         this.guides = [];
       }
@@ -255,10 +256,15 @@ export default /*#__PURE__*/defineComponent({
         let coordinate = this.getCoordinates(event);
         if (this.eraser || this.strokeType === 'dash') {
           this.strokes.coordinates.push(coordinate);
-          this.drawShape(this.strokes, false);
+          this.drawShape(this.context, this.strokes, false);
         } else {
           let coordinates;
           switch (this.strokeType) {
+            case 'line':
+              coordinates = [
+                { x: coordinate.x, y: coordinate.y }
+              ];
+              break;
             case 'square':
               coordinates = [
                 { x: coordinate.x, y: this.strokes.from.y },
@@ -298,10 +304,10 @@ export default /*#__PURE__*/defineComponent({
     },
     drawGuide(closingPath: boolean) {
       this.redraw(false);
-      this.context.strokeStyle = '#000000';
+      this.context.strokeStyle = this.color;
       this.context.lineWidth = 1;
-      this.context.lineJoin = 'round';
-      this.context.lineCap = 'round';
+      this.context.lineJoin = this.lineJoin;
+      this.context.lineCap = this.lineCap;
 
       this.context.beginPath();
       this.context.setLineDash([15, 15]);
@@ -318,30 +324,30 @@ export default /*#__PURE__*/defineComponent({
       }
       this.context.stroke();
     },
-    drawShape(strokes: any, closingPath: boolean) {
-      this.context.strokeStyle = strokes.color;
-      this.context.fillStyle = strokes.color;
-      this.context.lineWidth = strokes.width;
-      this.context.lineJoin = 'round';
-      this.context.lineCap = 'round';
+    drawShape(context: CanvasRenderingContext2D, strokes: any, closingPath: boolean) {
+      context.strokeStyle = strokes.color;
+      context.fillStyle = strokes.color;
+      context.lineWidth = strokes.width;
+      context.lineJoin = strokes.lineJoin === undefined ? this.lineJoin : strokes.lineJoin;
+      context.lineCap = strokes.lineCap === undefined ? this.lineCap : strokes.lineCap;
       
-      this.context.beginPath();
-      this.context.setLineDash([]);
+      context.beginPath();
+      context.setLineDash([]);
       if (strokes.type === 'circle') {
-        this.context.ellipse(strokes.coordinates[0].x, strokes.coordinates[0].y, strokes.coordinates[1].x, strokes.coordinates[1].y, 0, 0, Math.PI * 2);
+        context.ellipse(strokes.coordinates[0].x, strokes.coordinates[0].y, strokes.coordinates[1].x, strokes.coordinates[1].y, 0, 0, Math.PI * 2);
       } else {
-        this.context.moveTo(strokes.from.x, strokes.from.y);
+        context.moveTo(strokes.from.x, strokes.from.y);
         strokes.coordinates.forEach((stroke: { x: number, y: number}) => {
-          this.context.lineTo(stroke.x, stroke.y);
+          context.lineTo(stroke.x, stroke.y);
         });
         if (closingPath) {
-          this.context.closePath();
+          context.closePath();
         }
       }
       if (strokes.fill) {
-        this.context.fill();
+        context.fill();
       } else {
-        this.context.stroke();
+        context.stroke();
       }
     },
     stopDraw() {
@@ -393,9 +399,20 @@ export default /*#__PURE__*/defineComponent({
         this.drawAdditionalImages()
       })
       .then(() => {
-        this.images.forEach((strokes: any) => {
-          this.drawShape(strokes, strokes.type === 'eraser' || strokes.type === 'dash' ? false : true);
-        });
+        let baseCanvas: HTMLCanvasElement = document.createElement('canvas')
+        let baseCanvasContext: CanvasRenderingContext2D | null = baseCanvas.getContext('2d')
+        baseCanvas.width = Number(this.width)
+        baseCanvas.height = Number(this.height)
+        
+        if (baseCanvasContext) {
+          this.images.forEach((stroke: any) => {
+            if (baseCanvasContext) {
+              baseCanvasContext.globalCompositeOperation = stroke.type === 'eraser' ? 'destination-out' : 'source-over'
+              this.drawShape(baseCanvasContext, stroke, stroke.type === 'eraser' || stroke.type === 'dash' || this.strokeType === 'line' ? false : true)
+            }
+          })
+          this.context.drawImage(baseCanvas, 0, 0, Number(this.width), Number(this.height))
+        }
       })
       .then(() => {
         if (output) {
@@ -441,8 +458,8 @@ export default /*#__PURE__*/defineComponent({
       }
     },
     save() {
+      let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#'+this.canvasId);
       if (this.watermark) {
-        let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#'+this.canvasId);
         let temp = document.createElement('canvas');
         let ctx: CanvasRenderingContext2D | null = temp.getContext('2d')
         
@@ -454,15 +471,14 @@ export default /*#__PURE__*/defineComponent({
           this.drawWatermark(temp, ctx, <WatermarkData>this.watermark)
         }
       } else {
-        let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.querySelector('#'+this.canvasId);
         this.$emit('update:image', canvas.toDataURL('image/' + this.saveAs, 1));
         return canvas.toDataURL('image/' + this.saveAs, 1);
       }
     },
     drawWatermark(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, watermark: WatermarkData) {
       if (watermark.type === 'Image') {
-        let imageWidth = watermark.imageStyle ? (watermark.imageStyle.width ? watermark.imageStyle.width : this.width) : this.width;
-        let imageHeight = watermark.imageStyle ? (watermark.imageStyle.height ? watermark.imageStyle.height : this.height) : this.height;
+        let imageWidth = watermark.imageStyle ? (watermark.imageStyle.width ? watermark.imageStyle.width : Number(this.width)) : Number(this.width);
+        let imageHeight = watermark.imageStyle ? (watermark.imageStyle.height ? watermark.imageStyle.height : Number(this.height)) : Number(this.height);
 
         const image = new Image();
         image.src = watermark.source;
@@ -532,8 +548,8 @@ export default /*#__PURE__*/defineComponent({
       return h('canvas', {
         attrs: {
           id: this.canvasId,
-          width: this.width,
-          height: this.height
+          width: Number(this.width),
+          height: Number(this.height)
         },
         style: {
           'touchAction': 'none',
@@ -562,8 +578,8 @@ export default /*#__PURE__*/defineComponent({
     }
     return h('canvas', {
       id: this.canvasId,
-      height: this.height,
-      width: this.width,
+      height: Number(this.height),
+      width: Number(this.width),
       style: {
         'touchAction': 'none',
         // @ts-ignore
