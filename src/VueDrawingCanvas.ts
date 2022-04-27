@@ -129,6 +129,12 @@ export default /*#__PURE__*/defineComponent({
     additionalImages: {
       type: Array,
       default: (): any => []
+    },
+    outputWidth: {
+      type: Number
+    },
+    outputHeight: {
+      type: Number
     }
   },
   data(): DataInit {
@@ -143,7 +149,9 @@ export default /*#__PURE__*/defineComponent({
         coordinates: [],
         color: '',
         width: '',
-        fill: false
+        fill: false,
+        lineCap: '',
+        lineJoin: ''
       },
       guides: [],
       trash: []
@@ -367,7 +375,9 @@ export default /*#__PURE__*/defineComponent({
           coordinates: [],
           color: '',
           width: '',
-          fill: false
+          fill: false,
+          lineCap: '',
+          lineJoin: ''
         };
         this.guides = [];
         this.trash = [];
@@ -408,7 +418,7 @@ export default /*#__PURE__*/defineComponent({
           this.images.forEach((stroke: any) => {
             if (baseCanvasContext) {
               baseCanvasContext.globalCompositeOperation = stroke.type === 'eraser' ? 'destination-out' : 'source-over'
-              this.drawShape(baseCanvasContext, stroke, stroke.type === 'eraser' || stroke.type === 'dash' || this.strokeType === 'line' ? false : true)
+              this.drawShape(baseCanvasContext, stroke, stroke.type === 'eraser' || stroke.type === 'dash' || stroke.type === 'line' ? false : true)
             }
           })
           this.context.drawImage(baseCanvas, 0, 0, Number(this.width), Number(this.height))
@@ -471,8 +481,18 @@ export default /*#__PURE__*/defineComponent({
           this.drawWatermark(temp, ctx, <WatermarkData>this.watermark)
         }
       } else {
-        this.$emit('update:image', canvas.toDataURL('image/' + this.saveAs, 1));
-        return canvas.toDataURL('image/' + this.saveAs, 1);
+        let temp = document.createElement('canvas');
+        let tempCtx: CanvasRenderingContext2D | null = temp.getContext('2d')
+        let tempWidth = this.outputWidth === undefined ? this.width : this.outputWidth
+        let tempHeight = this.outputHeight === undefined ? this.height : this.outputHeight
+        temp.width = Number(tempWidth)
+        temp.height = Number(tempHeight)
+        
+        if (tempCtx) {
+          tempCtx.drawImage(canvas, 0, 0, Number(tempWidth), Number(tempHeight));
+          this.$emit('update:image', temp.toDataURL('image/' + this.saveAs, 1));
+          return temp.toDataURL('image/' + this.saveAs, 1);
+        }
       }
     },
     drawWatermark(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, watermark: WatermarkData) {
@@ -486,8 +506,19 @@ export default /*#__PURE__*/defineComponent({
           if (watermark && ctx) {
             ctx.drawImage(image, watermark.x, watermark.y, Number(imageWidth), Number(imageHeight));
           }
-          this.$emit('update:image', canvas.toDataURL('image/' + this.saveAs, 1));
-          return(canvas.toDataURL('image/' + this.saveAs, 1));
+          
+          let temp = document.createElement('canvas');
+          let tempCtx: CanvasRenderingContext2D | null = temp.getContext('2d')
+          let tempWidth = this.outputWidth === undefined ? this.width : this.outputWidth
+          let tempHeight = this.outputHeight === undefined ? this.height : this.outputHeight
+          temp.width = Number(tempWidth)
+          temp.height = Number(tempHeight)
+          
+          if (tempCtx) {
+            tempCtx.drawImage(canvas, 0, 0, Number(tempWidth), Number(tempHeight));
+            this.$emit('update:image', temp.toDataURL('image/' + this.saveAs, 1));
+            return temp.toDataURL('image/' + this.saveAs, 1);
+          }
         }
       } else if (watermark.type === 'Text') {
         let font = watermark.fontStyle ? (watermark.fontStyle.font ? watermark.fontStyle.font : '20px serif') : '20px serif';
@@ -532,8 +563,19 @@ export default /*#__PURE__*/defineComponent({
             ctx.fillText(watermark.source, watermark.x, watermark.y);
           }
         }
-        this.$emit('update:image', canvas.toDataURL('image/' + this.saveAs, 1));
-        return(canvas.toDataURL('image/' + this.saveAs, 1));
+
+        let temp = document.createElement('canvas');
+        let tempCtx: CanvasRenderingContext2D | null = temp.getContext('2d')
+        let tempWidth = this.outputWidth === undefined ? this.width : this.outputWidth
+        let tempHeight = this.outputHeight === undefined ? this.height : this.outputHeight
+        temp.width = Number(tempWidth)
+        temp.height = Number(tempHeight)
+        
+        if (tempCtx) {
+          tempCtx.drawImage(canvas, 0, 0, Number(tempWidth), Number(tempHeight));
+          this.$emit('update:image', temp.toDataURL('image/' + this.saveAs, 1));
+          return temp.toDataURL('image/' + this.saveAs, 1);
+        }
       }
     },
     isEmpty() {

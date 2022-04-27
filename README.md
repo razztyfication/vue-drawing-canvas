@@ -100,6 +100,8 @@ Then add it to your component files
 | styles           | Array, String, Object |                    | Specifies your own styles to canvas                                                                                                                                                                                                                            |
 | watermark        |        Object         |                    | Put watermark text/image on your image output<br><br>(see details in the next section below)                                                                                                                                                                   |
 | saveAs           |        String         |      `"png"`       | Specifies output type. This props accept either `"png"` or `"jpeg"`                                                                                                                                                                                            |
+| outputWidth      |        Number         |   `this.width`     | Specifies image output width, if `undefined` then canvas width will be used                                                                                                                                                                                    |
+| outputHeight     |        Number         |   `this.height`    | Specifies image output height, if `undefined` then canvas height will be used                                                                                                                                                                                  |
 
 <br>
 

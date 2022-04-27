@@ -1,4 +1,11 @@
-# [v1.0.10](https://github.com/razztyfication/vue-drawing-canvas)
+# [v1.0.11](https://github.com/razztyfication/vue-drawing-canvas)
+
+- Added new prop **outputWidth** and **outputHeight**
+- Bug fixes
+
+<br>
+
+# [v1.0.10](https://github.com/razztyfication/vue-drawing-canvas/tree/v1.0.10)
 
 - Eraser no longer erase background image.
 - Added new prop **lineCap** and **lineJoin**

@@ -104,6 +104,8 @@ export default defineComponent({
           :watermark="watermark"
           :initial-image="initialImage"
           saveAs="png"
+          :output-width="300"
+          :output-height="200"
           :styles="{
             'border': 'solid 1px #000'
           }"
