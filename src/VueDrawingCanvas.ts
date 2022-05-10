@@ -266,46 +266,44 @@ export default /*#__PURE__*/defineComponent({
           this.strokes.coordinates.push(coordinate);
           this.drawShape(this.context, this.strokes, false);
         } else {
-          let coordinates;
           switch (this.strokeType) {
             case 'line':
-              coordinates = [
+              this.guides = [
                 { x: coordinate.x, y: coordinate.y }
               ];
               break;
             case 'square':
-              coordinates = [
+              this.guides = [
                 { x: coordinate.x, y: this.strokes.from.y },
                 { x: coordinate.x, y: coordinate.y },
                 { x: this.strokes.from.x, y: coordinate.y }, 
-                {x: this.strokes.from.x, y: this.strokes.from.y}
+                { x: this.strokes.from.x, y: this.strokes.from.y }
               ];
               break;
             case 'triangle':
               let center = Math.floor((coordinate.x - this.strokes.from.x) / 2) < 0 ? Math.floor((coordinate.x - this.strokes.from.x) / 2) * -1 : Math.floor((coordinate.x - this.strokes.from.x) / 2);
               let width = this.strokes.from.x < coordinate.x ? this.strokes.from.x + center : this.strokes.from.x - center;
-              coordinates = [
+              this.guides = [
                 { x: coordinate.x, y: this.strokes.from.y },
                 { x: width, y: coordinate.y }, 
-                {x: this.strokes.from.x, y: this.strokes.from.y}
+                { x: this.strokes.from.x, y: this.strokes.from.y }
               ];
               break;
             case 'half_triangle':
-              coordinates = [
+              this.guides = [
                 { x: coordinate.x, y: this.strokes.from.y },
                 { x: this.strokes.from.x, y: coordinate.y }, 
-                {x: this.strokes.from.x, y: this.strokes.from.y}
+                { x: this.strokes.from.x, y: this.strokes.from.y }
               ];
               break;
             case 'circle':
               let radiusX = this.strokes.from.x - coordinate.x < 0 ? (this.strokes.from.x - coordinate.x) * -1 : this.strokes.from.x - coordinate.x;
-              coordinates = [
+              this.guides = [
                 { x: this.strokes.from.x > coordinate.x ? this.strokes.from.x - radiusX : this.strokes.from.x + radiusX, y: this.strokes.from.y },
                 { x: radiusX, y: radiusX }
               ];
               break;
           }
-          this.guides = coordinates;
           this.drawGuide(true);
         }
       }
@@ -338,7 +336,6 @@ export default /*#__PURE__*/defineComponent({
       context.lineWidth = strokes.width;
       context.lineJoin = strokes.lineJoin === undefined ? this.lineJoin : strokes.lineJoin;
       context.lineCap = strokes.lineCap === undefined ? this.lineCap : strokes.lineCap;
-      
       context.beginPath();
       context.setLineDash([]);
       if (strokes.type === 'circle') {
@@ -418,7 +415,9 @@ export default /*#__PURE__*/defineComponent({
           this.images.forEach((stroke: any) => {
             if (baseCanvasContext) {
               baseCanvasContext.globalCompositeOperation = stroke.type === 'eraser' ? 'destination-out' : 'source-over'
-              this.drawShape(baseCanvasContext, stroke, stroke.type === 'eraser' || stroke.type === 'dash' || stroke.type === 'line' ? false : true)
+              if (stroke.type !== 'circle' || (stroke.type === 'circle' && stroke.coordinates.length > 0)) {
+                this.drawShape(baseCanvasContext, stroke, (stroke.type === 'eraser' || stroke.type === 'dash' || stroke.type === 'line' ? false : true))
+              }
             }
           })
           this.context.drawImage(baseCanvas, 0, 0, Number(this.width), Number(this.height))

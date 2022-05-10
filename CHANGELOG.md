@@ -1,4 +1,10 @@
-# [v1.0.11](https://github.com/razztyfication/vue-drawing-canvas)
+# [v1.0.12](https://github.com/razztyfication/vue-drawing-canvas)
+
+- Bug fix canvas break when draw circle with no coordinates
+
+<br>
+
+# [v1.0.11](https://github.com/razztyfication/vue-drawing-canvas/tree/v1.0.11)
 
 - Added new prop **outputWidth** and **outputHeight**
 - Bug fixes
