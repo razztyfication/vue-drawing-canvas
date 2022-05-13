@@ -1,4 +1,10 @@
-# [v1.0.12](https://github.com/razztyfication/vue-drawing-canvas)
+# [v1.0.13](https://github.com/razztyfication/vue-drawing-canvas)
+
+- Bug fix missing line guide when background image exist
+
+<br>
+
+# [v1.0.12](https://github.com/razztyfication/vue-drawing-canvas/tree/v1.0.12)
 
 - Bug fix canvas break when draw circle with no coordinates
 

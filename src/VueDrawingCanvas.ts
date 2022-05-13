@@ -309,26 +309,28 @@ export default /*#__PURE__*/defineComponent({
       }
     },
     drawGuide(closingPath: boolean) {
-      this.redraw(false);
-      this.context.strokeStyle = this.color;
-      this.context.lineWidth = 1;
-      this.context.lineJoin = this.lineJoin;
-      this.context.lineCap = this.lineCap;
+      this.redraw(true);
+      this.$nextTick(() => {
+        this.context.strokeStyle = this.color;
+        this.context.lineWidth = 1;
+        this.context.lineJoin = this.lineJoin;
+        this.context.lineCap = this.lineCap;
 
-      this.context.beginPath();
-      this.context.setLineDash([15, 15]);
-      if (this.strokes.type === 'circle') {
-        this.context.ellipse(this.guides[0].x, this.guides[0].y, this.guides[1].x, this.guides[1].y, 0, 0, Math.PI * 2);
-      } else {
-        this.context.moveTo(this.strokes.from.x, this.strokes.from.y);
-        this.guides.forEach((coordinate: {x: number, y: number}) => {
-          this.context.lineTo(coordinate.x, coordinate.y);
-        });
-        if (closingPath) {
-          this.context.closePath();
+        this.context.beginPath();
+        this.context.setLineDash([15, 15]);
+        if (this.strokes.type === 'circle') {
+          this.context.ellipse(this.guides[0].x, this.guides[0].y, this.guides[1].x, this.guides[1].y, 0, 0, Math.PI * 2);
+        } else {
+          this.context.moveTo(this.strokes.from.x, this.strokes.from.y);
+          this.guides.forEach((coordinate: {x: number, y: number}) => {
+            this.context.lineTo(coordinate.x, coordinate.y);
+          });
+          if (closingPath) {
+            this.context.closePath();
+          }
         }
-      }
-      this.context.stroke();
+        this.context.stroke();
+      })
     },
     drawShape(context: CanvasRenderingContext2D, strokes: any, closingPath: boolean) {
       context.strokeStyle = strokes.color;
