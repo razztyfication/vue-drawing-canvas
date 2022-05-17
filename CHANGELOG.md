@@ -1,4 +1,10 @@
-# [v1.0.13](https://github.com/razztyfication/vue-drawing-canvas)
+# [v1.0.14](https://github.com/razztyfication/vue-drawing-canvas)
+
+- Bug fix background color not working
+
+<br>
+
+# [v1.0.13](https://github.com/razztyfication/vue-drawing-canvas/tree/v1.0.13)
 
 - Bug fix missing line guide when background image exist
 

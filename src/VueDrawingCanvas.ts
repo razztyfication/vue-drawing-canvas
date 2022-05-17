@@ -197,6 +197,7 @@ export default /*#__PURE__*/defineComponent({
     async setBackground() {
       this.clear();
       this.context.fillStyle = this.backgroundColor;
+      this.context.fillRect(0, 0, Number(this.width), Number(this.height))
       
       await this.$nextTick(async () => {
         await this.drawBackgroundImage()
